@@ -1,0 +1,36 @@
+{
+    "statuses": [
+      "NOT_SENT_TO_PRINTER",
+      "SENT_TO_PRINTER",
+      "ON_ITS_WAY_TO_WAREHOUSE",
+      "BEING_INSERTED_TO_BOXES",
+      "READY_TO_SHIP",
+      "SHIPPING",
+      "SHIPPED"
+      ],
+    "tokenStandards": [
+      "ERC20",
+      "ERC721",
+      "ERC1155"
+    ],
+    "claimPatterns": [
+      "mint",
+      "transfer"
+    ],
+    "requestSizeLimit": "1024mb",
+    "origins": [
+      "http://localhost:3000",
+      "http://localhost:3001",    
+      "http://localhost:9090",
+      "http://localhost:9002"
+    ],
+    "claimMethod": {
+      "ERC20": "claim",
+      "ERC721": "claim-erc721",
+      "ERC1155": "claim-erc1155"
+    },
+    "factoryAddresses": {
+      "8453": "0xa81880C06e925Ad1412773D621425796467A9C61"
+    }
+  }
+  
