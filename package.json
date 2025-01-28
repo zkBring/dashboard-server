@@ -9,8 +9,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "node --max-old-space-size=4096 server.js",
-    "test": "NODE_ENV=test mocha --recursive --exit --timeout 50000",
-    "heroku-postbuild": "migrate-mongo up"
+    "test": "NODE_ENV=test mocha --recursive --exit --timeout 50000"
   },
   "dependencies": {
     "@reclaimprotocol/js-sdk": "^2.1.2",
