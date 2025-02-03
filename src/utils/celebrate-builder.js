@@ -705,6 +705,15 @@ const celebrateMiddleware = celebrateSchema => {
         }),
         app_title_on: Joi.boolean().optional().messages({
           'boolean.base': 'APP_TITLE_ON_WRONG_TYPE'
+        }),
+        reclaim_app_id: Joi.string().optional().allow("").messages({
+          'string.base': 'RECLAIM_APP_ID_WRONG_TYPE'
+        }),
+        reclaim_app_secret: Joi.string().optional().allow("").messages({
+          'string.base': 'RECLAIM_APP_SECRET_WRONG_TYPE'
+        }),
+        reclaim_provider_id: Joi.string().optional().allow("").messages({
+          'string.base': 'RECLAIM_PROVIDER_ID_WRONG_TYPE'
         })
       })
     }, { abortEarly: false, mode: 'FULL' })
