@@ -55,6 +55,7 @@ class DispenserService {
       params.reclaimAppId = stageConfig.RECLAIM_APP_ID
       params.reclaimAppSecret = stageConfig.RECLAIM_APP_SECRET
       params.reclaimProviderId = stageConfig.RECLAIM_PROVIDER_ID
+      params.reclaimProviderType = 'instagram'
     }
 
     return await this._create(params)
@@ -77,6 +78,7 @@ class DispenserService {
     creatorAddress,
     reclaimAppSecret,
     reclaimProviderId,
+    reclaimProviderType,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
@@ -97,6 +99,7 @@ class DispenserService {
       creatorAddress,
       reclaimAppSecret,
       reclaimProviderId,
+      reclaimProviderType,
       encryptedMultiscanQrSecret,
       encryptedMultiscanQrEncCode
     })
