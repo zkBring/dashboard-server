@@ -104,6 +104,12 @@ const DispenserSchema = new mongoose.Schema({
   },
   instagramFollowId: {
     type: String
+  },
+  reclaimProviderType: {
+    type: String,
+    enum: [
+      'instagram'
+    ]
   }
 },
 {
@@ -135,6 +141,7 @@ DispenserSchema.options.toJSON = {
     ret.reclaim_app_secret = ret.reclaimAppSecret
     ret.instagram_follow_id = ret.instagramFollowId
     ret.reclaim_provider_id = ret.reclaimProviderId
+    ret.reclaim_provider_type = ret.reclaimProviderType
     ret.encrypted_multiscan_qr_secret = ret.encryptedMultiscanQrSecret
     ret.encrypted_multiscan_qr_enc_code = ret.encryptedMultiscanQrEncCode
     ret.created_at = ret.createdAt
@@ -158,6 +165,7 @@ DispenserSchema.options.toJSON = {
     delete ret.reclaimAppSecret
     delete ret.reclaimProviderId
     delete ret.instagramFollowId
+    delete ret.reclaimProviderType
     delete ret.encryptedMultiscanQrSecret
     delete ret.encryptedMultiscanQrEncCode
     delete ret.createdAt
