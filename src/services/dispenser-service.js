@@ -391,7 +391,7 @@ class DispenserService {
     // ..
 
     // meanwhie just filter by user id
-    logger.json(reclaimProof)
+
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
 
     // check if link was already popped by this reclaimDeviceId
