@@ -9,6 +9,7 @@ const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
+const { log } = require('winston')
 
 class DispenserService {
   constructor () {
@@ -394,7 +395,9 @@ class DispenserService {
       logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
       return alreadyClaimed
     }
-    
+    logger.json({ reclaimProof.claimData })
+    logger.json({ reclaimProof.claimData?.context? })
+    logger.json({ reclaimProof.claimData?.context?.extractedParameters })
     const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
     const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
     const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
