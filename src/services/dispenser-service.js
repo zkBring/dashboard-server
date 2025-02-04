@@ -9,7 +9,6 @@ const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
-const { log } = require('winston')
 
 class DispenserService {
   constructor () {
@@ -396,11 +395,10 @@ class DispenserService {
       logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
       return alreadyClaimed
     }
-    logger.json({ claimData: reclaimProof.claimData })
-    logger.json({ context: reclaimProof.claimData?.context })
-    logger.json({ keke: "krkk", extractedParameters: reclaimProof.claimData?.context?.extractedParameters })
-    logger.json({ extractedParameters: reclaimProof.claimData?.context?.contextMessage })
-    logger.debug(reclaimProof.claimData?.context?.extractedParameters)
+    const context = JSON.parse(reclaimProof.claimData.context)
+    logger.json({ parsedcontext: context })
+    logger.json({ extractedParameters: context.extractedParameters })
+
     const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
     const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
     const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
