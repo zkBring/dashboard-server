@@ -237,7 +237,6 @@ const getCampaignDataForClaimer = async (req, res) => {
 
 const receiveReclaimProofs = async (req, res) => {
   let reclaimProof = req.body
-  console.log('reclaimProof', reclaimProof)
 
   const { multiscan_qr_id: multiscanQrId, session_id: reclaimSessionId } = req.params
   const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
