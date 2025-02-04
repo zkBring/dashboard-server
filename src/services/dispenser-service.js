@@ -424,7 +424,7 @@ class DispenserService {
     await Claimer.create({ 
       dispenser: dispenser._id,
       claimerId: userInstagramId, 
-      reclaimProviderType: 'instagram' 
+      reclaimProviderType: dispenser.reclaimProviderType 
     })
   }
 
