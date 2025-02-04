@@ -26,9 +26,13 @@ ClaimerSchema.options.toJSON = {
   versionKey: false,
   transform: function (doc, ret, options) {
     ret.claimer_id = ret.claimerId
+    ret.dispenser_id = ret.dispenser
+    ret.reclaim_provider_type = ret.reclaimProviderType
     ret.created_at = ret.createdAt
     ret.updated_at = ret.updatedAt
     delete ret._id
+    delete ret.dispenser
+    delete ret.reclaimProviderType
     delete ret.claimerId
     delete ret.createdAt
     delete ret.updatedAt
