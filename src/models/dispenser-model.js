@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const ClaimerSchema = require('./claimer-model')
 
 const DispenserSchema = new mongoose.Schema({
   title: {

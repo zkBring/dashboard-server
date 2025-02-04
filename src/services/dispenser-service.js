@@ -398,6 +398,7 @@ class DispenserService {
     const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
     const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
     const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
+    logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
     if (isFollowing !== 'true') {
       throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW')
     }
