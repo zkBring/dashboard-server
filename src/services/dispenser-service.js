@@ -399,6 +399,8 @@ class DispenserService {
     logger.json({ claimData: reclaimProof.claimData })
     logger.json({ context: reclaimProof.claimData?.context })
     logger.json({ keke: "krkk", extractedParameters: reclaimProof.claimData?.context?.extractedParameters })
+    logger.json({ extractedParameters: reclaimProof.claimData?.context?.contextMessage })
+    logger.debug(reclaimProof.claimData?.context?.extractedParameters)
     const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
     const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
     const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
