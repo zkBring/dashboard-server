@@ -383,6 +383,7 @@ class DispenserService {
     reclaimSessionId,
     reclaimProof
   }) {
+    logger.json({ reclaimproof1: reclaimProof })
     // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     
