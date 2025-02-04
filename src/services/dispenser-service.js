@@ -395,13 +395,11 @@ class DispenserService {
       logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
       return alreadyClaimed
     }
-    const context = JSON.parse(reclaimProof.claimData.context)
-    logger.json({ parsedcontext: context })
-    logger.json({ extractedParameters: context.extractedParameters })
+    const context = JSON.parse(reclaimProof.claimData?.context)
 
-    const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
-    const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
-    const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
+    const isFollowing = context?.extractedParameters?.following
+    const isCorrectInstagramFollowId = context?.extractedParameters?.id
+    const userInstagramId = context?.extractedParameters?.id_23422
     logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
     if (isFollowing !== 'true') {
       throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW')
