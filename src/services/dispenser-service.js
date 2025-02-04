@@ -2,6 +2,7 @@ const ethers = require('ethers')
 const logger = require('../utils/logger')
 const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
+const Claimer = require('../models/claimer-model')
 const Dispenser = require('../models/dispenser-model')
 const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
@@ -381,26 +382,35 @@ class DispenserService {
     reclaimSessionId,
     reclaimProof
   }) {
-    logger.json({ reclaimProof })
     // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-
-    // #TODO: verify reclaim body
-    // ..
-
-    // #TODO: get unique user id from proof and filter by it
-    // ..
-
-    // meanwhie just filter by user id
-
-    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
-
+    
     // check if link was already popped by this reclaimDeviceId
-    const alreadyClaimed = await dispenserLinkService.findOneByDispenserIdAndReclaimDeviceId(dispenser._id, reclaimDeviceId)
+    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
+    const alreadyClaimed = await dispenserLinkService
+      .findOneByDispenserIdAndReclaimDeviceId(dispenser._id, reclaimDeviceId)
     if (alreadyClaimed) {
       this.dublicateReclaims[reclaimSessionId] = alreadyClaimed.reclaimSessionId
       logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
       return alreadyClaimed
+    }
+    
+    const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
+    const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
+    const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
+    if (isFollowing !== 'true') {
+      throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW')
+    }
+    if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
+      throw new BadRequestError('User should follow the correct account to claim.', 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT')
+    }
+
+    const claimerExists = await Claimer.exists({ 
+      dispenser: dispenser._id, 
+      claimerId: userInstagramId 
+    })
+    if (claimerExists) {
+      throw new BadRequestError('User already claimed and exists in database.', 'USER_ALREADY_CLAIMED_AND_EXISTS')
     }
 
     const dispenserLink = await this._popDispenserLink({ dispenser })
@@ -409,6 +419,12 @@ class DispenserService {
     dispenserLink.reclaimDeviceId = reclaimDeviceId
     dispenserLink.reclaimSessionId = reclaimSessionId
     await dispenserLink.save()
+
+    await Claimer.create({ 
+      dispenser: dispenser._id,
+      claimerId: userInstagramId, 
+      reclaimProviderType: 'instagram' 
+    })
   }
 
   async pop ({
@@ -441,9 +457,7 @@ class DispenserService {
     return dispenserLink.encryptedClaimLink
   }
 
-  async _popDispenserLink ({
-    dispenser
-  }) {
+  async _popDispenserLink ({ dispenser }) {
     if (!dispenser.active) {
       throw new ForbiddenError('Dispenser is not active.', 'DISPENSER_IS_INACTIVE')
     }
