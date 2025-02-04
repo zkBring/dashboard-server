@@ -400,7 +400,9 @@ class DispenserService {
     const isFollowing = context?.extractedParameters?.following
     const isCorrectInstagramFollowId = context?.extractedParameters?.id
     const userInstagramId = context?.extractedParameters?.id_23422
+
     logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
+    
     if (isFollowing !== 'true') {
       throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW')
     }
