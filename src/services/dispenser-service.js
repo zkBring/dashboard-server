@@ -395,9 +395,9 @@ class DispenserService {
       logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
       return alreadyClaimed
     }
-    logger.json({ reclaimProof.claimData })
-    logger.json({ reclaimProof.claimData?.context? })
-    logger.json({ reclaimProof.claimData?.context?.extractedParameters })
+    logger.json({ claimData: reclaimProof.claimData })
+    logger.json({ context: reclaimProof.claimData?.context })
+    logger.json({ extractedParameters: reclaimProof.claimData?.context?.extractedParameters })
     const isFollowing = reclaimProof?.claimData?.context?.extractedParameters?.following
     const isCorrectInstagramFollowId = reclaimProof?.claimData?.context?.extractedParameters?.id
     const userInstagramId = reclaimProof?.claimData?.context?.extractedParameters?.id_23422
