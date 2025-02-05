@@ -12,6 +12,7 @@
   "DISPENSER_NOT_FOUND": { "warn": true },
   "NO_FIELDS_TO_UPDATE": { "warn": true },
   "INVALID_CLAIM_START": { "warn": true },
+  "USER_ALREADY_CLAIMED": { "warn": true },
   "SCAN_ID_NOT_VERIFIED": { "warn": true },
   "UNAUTHORIZED_REQUEST": { "warn": true },
   "CLAIM_LINK_NOT_FOUND": { "warn": true },
@@ -33,11 +34,13 @@
   "WHITELIST_SIG_NOT_VERIFIED": { "warn": true },
   "API_SECRET_KEY_NOT_PROVIDED": { "warn": true },
   "X_CAMPAIGN_KEY_NOT_VERIFIED": { "warn": true },
+  "USER_SHOULD_FOLLOW_TO_CLAIM": { "warn": true },
   "CREATOR_ADDRESS_NOT_PROVIDED": { "warn": true },
   "ERROR_SIGNATURE_VERIFICATION": { "warn": true },
   "RECEIVER_ADDRESS_NOT_VERIFIED": { "warn": true },
   "CAMPAIGN_ID_NOT_MATCH_DISPENSER": { "warn": true },
   "CLAIM_LINK_NOT_AVAILABLE_IN_REGION": { "warn": true },
+  "USER_SHOULD_FOLLOW_CORRECT_ACCOUNT": { "warn": true },
   "UPLOADING_DUPLICATE_LINKS_IS_FORBIDDEN": { "warn": true },
   "TOKEN_OR_X_CAMPAIGN_KEY_OR_CUSTOMER_NOT_PROVIDED": { "warn": true }
 }

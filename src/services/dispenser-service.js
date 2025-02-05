@@ -385,16 +385,7 @@ class DispenserService {
     logger.json({ reclaimproof1: reclaimProof })
     // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-    
-    // check if link was already popped by this reclaimDeviceId
-    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
-    const alreadyClaimed = await dispenserLinkService
-      .findOneByDispenserIdAndReclaimDeviceId(dispenser._id, reclaimDeviceId)
-    if (alreadyClaimed) {
-      this.dublicateReclaims[reclaimSessionId] = alreadyClaimed.reclaimSessionId
-      logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
-      return alreadyClaimed
-    }
+
     const context = JSON.parse(reclaimProof.claimData?.context)
 
     const isFollowing = context?.extractedParameters?.following
@@ -402,9 +393,9 @@ class DispenserService {
     const userInstagramId = context?.extractedParameters?.id_23422
 
     logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
-    
+
     if (isFollowing !== 'true') {
-      throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW')
+      throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW_TO_CLAIM')
     }
     if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
       throw new BadRequestError('User should follow the correct account to claim.', 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT')
@@ -415,7 +406,7 @@ class DispenserService {
       claimerId: userInstagramId 
     })
     if (claimerExists) {
-      throw new BadRequestError('User already claimed and exists in database.', 'USER_ALREADY_CLAIMED_AND_EXISTS')
+      throw new BadRequestError('User already claimed.', 'USER_ALREADY_CLAIMED')
     }
 
     const dispenserLink = await this._popDispenserLink({ dispenser })
