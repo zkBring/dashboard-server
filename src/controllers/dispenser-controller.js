@@ -190,6 +190,8 @@ const getCampaign = async (req, res) => {
 const getCampaignDataForClaimer = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
   const { multiscanQREncCode } = req.query
+  const SERVER_URL = 'https://' + req.get('host')
+  const APP_URL = req.get('origin')
   logger.json({ controller: 'dispenser-controller', method: 'getCampaignDataForClaimer', multiscan_qr_id: multiscanQrId })
 
   if (!multiscanQrId) throw new BadRequestError('Multiscan qr id is not provided.', 'MULTISCAN_QR_ID_REQUIRED')
@@ -198,7 +200,7 @@ const getCampaignDataForClaimer = async (req, res) => {
     campaign,
     reclaim,
     reclaimVerificationURL
-  } = await dispenserService.getCampaignDataForClaimer({ multiscanQrId, multiscanQREncCode })
+  } = await dispenserService.getCampaignDataForClaimer({ multiscanQrId, multiscanQREncCode, SERVER_URL, APP_URL })
 
   res.json({
     success: true,

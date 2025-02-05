@@ -364,7 +364,7 @@ class DispenserService {
     }
   }
 
-  async getCampaignDataForClaimer ({ multiscanQrId, multiscanQREncCode }) {
+  async getCampaignDataForClaimer ({ multiscanQrId, multiscanQREncCode, SERVER_URL, APP_URL }) {
     const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
     if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
   
@@ -373,8 +373,6 @@ class DispenserService {
     if (dispenser.reclaim) {
       const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
       await reclaimVerificationService.createReclaimVerification({ reclaimSessionId: reclaimProofRequest.sessionId })
-      const SERVER_URL = 'https://' + req.get('host')
-      const APP_URL = req.get('origin')
   
       logger.json({ SERVER_URL, APP_URL })
       const jsonProofResponse = false
