@@ -379,13 +379,13 @@ class DispenserService {
 
   async popReclaimDispenser ({
     dispenser,
-    reclaimSessionId,
-    reclaimProof
+    reclaimProof,
+    reclaimSessionId
   }) {
-    logger.json({ reclaimproof1: reclaimProof })
     // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-
+    
+    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
 
     const isFollowing = context?.extractedParameters?.following
