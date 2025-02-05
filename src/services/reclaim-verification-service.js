@@ -2,6 +2,7 @@ const reclaimVerification = require('../models/reclaim-verification-model')
 
 class reclaimVerificationService {
   async createReclaimVerification({ reclaimSessionId }) {
+    console.log('reclaimSessionId', reclaimSessionId)
     return await reclaimVerification.create({ 
       reclaimSessionId,
       status: 'pending'
