@@ -8,6 +8,8 @@ const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
+const { ReclaimProofRequest } = require('@reclaimprotocol/js-sdk')
+const reclaimVerificationService = require('./reclaim-verification-service')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
 class DispenserService {
@@ -362,6 +364,46 @@ class DispenserService {
     }
   }
 
+  async getCampaignDataForClaimer ({ multiscanQrId, multiscanQREncCode }) {
+    const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
+    if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
+  
+    let reclaimVerificationURL = null
+  
+    if (dispenser.reclaim) {
+      const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
+      await reclaimVerificationService.createReclaimVerification({ reclaimSessionId: reclaimProofRequest.sessionId })
+      const SERVER_URL = 'https://' + req.get('host')
+      const APP_URL = req.get('origin')
+  
+      logger.json({ SERVER_URL, APP_URL })
+      const jsonProofResponse = false
+      reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
+  
+      const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
+      reclaimProofRequest.setRedirectUrl(redirectUrl)
+  
+      // Generate the verification request URL
+      reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
+  
+      const reclaimRequestJson = reclaimProofRequest.toJsonString()
+      logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
+    }
+  
+    const campaign = await this.getCampaign(dispenser)
+    campaign.preview_setting = dispenser.previewSetting
+    campaign.whitelist_type = dispenser.whitelistType
+    campaign.whitelist_on = dispenser.whitelistOn
+    campaign.redirect_url = dispenser.redirectUrl
+    campaign.redirect_on = dispenser.redirectOn
+    
+    return {
+      campaign,
+      reclaimVerificationURL,
+      reclaim: dispenser.reclaim
+    }
+  }
+
   async getLinkByReclaimSessionId ({
     dispenser,
     reclaimSessionId
@@ -395,6 +437,11 @@ class DispenserService {
     logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
 
     if (isFollowing !== 'true') {
+      // return await reclaimVerificationService.updateOnFailedVerification({
+      //   reclaimSessionId, 
+      //   message: 'User should follow the account to claim.', 
+      //   cause: 'USER_SHOULD_FOLLOW_TO_CLAIM'
+      // })
       throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW_TO_CLAIM')
     }
     if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
