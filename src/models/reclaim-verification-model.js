@@ -13,8 +13,14 @@ reclaimSessionId: {
       'failed'
     ]
   },
-  cause: String,
-  message: String
+  cause: {
+    type: String,
+    default: ''
+  },
+  message: {
+    type: String,
+    default: ''
+  }
 },
 {
   timestamps: true

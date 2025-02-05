@@ -242,15 +242,8 @@ const popReclaimLink = async (req, res) => {
 
   logger.json({ controller: 'dispenser-controller', method: 'popReclaimLink', multiscanQrId, reclaimSessionId })
   logger.json({ multiscanQrId, reclaimSessionId })
-
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  const encryptedClaimLink = await dispenserService.getLinkByReclaimSessionId({
-    dispenser,
-    reclaimSessionId
-  })
+  
+  const encryptedClaimLink = await dispenserService.popReclaimLink({ multiscanQrId, reclaimSessionId })
 
   res.json({
     success: true,

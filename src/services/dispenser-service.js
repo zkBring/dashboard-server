@@ -372,7 +372,6 @@ class DispenserService {
   
     if (dispenser.reclaim) {
       const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
-      await reclaimVerificationService.createReclaimVerification({ reclaimSessionId: reclaimProofRequest.sessionId })
   
       logger.json({ SERVER_URL, APP_URL })
       const jsonProofResponse = false
@@ -424,6 +423,7 @@ class DispenserService {
   }) {
     // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
+    const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
     
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
@@ -435,15 +435,20 @@ class DispenserService {
     logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
 
     if (isFollowing !== 'true') {
-      // return await reclaimVerificationService.updateOnFailedVerification({
-      //   reclaimSessionId, 
-      //   message: 'User should follow the account to claim.', 
-      //   cause: 'USER_SHOULD_FOLLOW_TO_CLAIM'
-      // })
-      throw new BadRequestError('User should follow the account to claim.', 'USER_SHOULD_FOLLOW_TO_CLAIM')
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'User should follow the account to claim.', 
+        cause: 'USER_SHOULD_FOLLOW_TO_CLAIM',
+        status: 'failed'
+      })
     }
     if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
-      throw new BadRequestError('User should follow the correct account to claim.', 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT')
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'User should follow the correct account to claim.', 
+        cause: 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT',
+        status: 'failed'
+      })
     }
 
     const claimerExists = await Claimer.exists({ 
@@ -451,8 +456,20 @@ class DispenserService {
       claimerId: userInstagramId 
     })
     if (claimerExists) {
-      throw new BadRequestError('User already claimed.', 'USER_ALREADY_CLAIMED')
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'User already claimed.', 
+        cause: 'USER_ALREADY_CLAIMED',
+        status: 'failed'
+      })
     }
+
+    await reclaimVerificationService.updateReclaimVerification({
+      reclaimVerification,
+      status: 'success',
+      message: '', 
+      cause: ''
+    })
 
     const dispenserLink = await this._popDispenserLink({ dispenser })
 
@@ -465,6 +482,25 @@ class DispenserService {
       dispenser: dispenser._id,
       claimerId: userInstagramId, 
       reclaimProviderType: dispenser.reclaimProviderType 
+    })
+  }
+
+  async popReclaimLink({ multiscanQrId, reclaimSessionId }) {
+    const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
+    if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
+    
+    const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
+    if (!reclaimVerification) throw new BadRequestError('Reclaim verification not exists.', 'REACLAIM_VERIFICATION_NOT_EXISTS')
+
+    if (reclaimVerification.status !== 'success') {
+      const message = reclaimVerification.message || 'Reclaim verification is pending.'
+      const cause = reclaimVerification.cause || 'RECLAIM_VERIFICATION_PENDING' 
+      throw new BadRequestError(message, cause)
+    }
+    
+    return await this.getLinkByReclaimSessionId({
+      dispenser,
+      reclaimSessionId
     })
   }
 

@@ -2,27 +2,33 @@ const reclaimVerification = require('../models/reclaim-verification-model')
 
 class reclaimVerificationService {
   async createReclaimVerification({ reclaimSessionId }) {
-    console.log('reclaimSessionId', reclaimSessionId)
+    const existingReclaimVerification = await reclaimVerification.findOne({ reclaimSessionId })
+    
+    if (existingReclaimVerification) {
+      existingReclaimVerification.status = 'pending'
+      existingReclaimVerification.cause = ''
+      existingReclaimVerification.message = ''
+
+      return await existingReclaimVerification.save()
+    }
+
     return await reclaimVerification.create({ 
       reclaimSessionId,
       status: 'pending'
     })
   }
   
-  async updateOnFailedVerification({ 
-    reclaimSessionId, 
-    message, 
+  async updateReclaimVerification({ 
+    reclaimVerification,
+    message,
+    status,
     cause
   }) {
-    await reclaimVerification.updateOne(
-      { reclaimSessionId },
-      { $set: {
-          status: 'failed', 
-          cause,
-          message
-        } 
-      }
-    )
+    reclaimVerification.status = status
+    reclaimVerification.message = message
+    reclaimVerification.cause = cause
+    
+    return await reclaimVerification.save()
   }
 }
 
