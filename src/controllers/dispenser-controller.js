@@ -217,6 +217,8 @@ const receiveReclaimProofs = async (req, res) => {
     multiscan_qr_id: multiscanQrId, 
     session_id: reclaimSessionId
   } = req.params
+  logger.json({ controller: 'dispenser-controller', method: 'receiveReclaimProofs', multiscan_qr_id: multiscanQrId, session_id: reclaimSessionId })
+
   const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
   logger.json({ reclaimProof, multiscanQrId, reclaimSessionId })
   if (!dispenser) {
