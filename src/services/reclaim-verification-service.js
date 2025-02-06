@@ -1,8 +1,8 @@
-const reclaimVerification = require('../models/reclaim-verification-model')
+const ReclaimVerification = require('../models/reclaim-verification-model')
 
 class reclaimVerificationService {
   async createReclaimVerification({ reclaimSessionId }) {
-    const existingReclaimVerification = await reclaimVerification.findOne({ reclaimSessionId })
+    const existingReclaimVerification = await ReclaimVerification.findOne({ reclaimSessionId })
     
     if (existingReclaimVerification) {
       existingReclaimVerification.status = 'pending'
@@ -12,10 +12,14 @@ class reclaimVerificationService {
       return await existingReclaimVerification.save()
     }
 
-    return await reclaimVerification.create({ 
+    return await ReclaimVerification.create({ 
       reclaimSessionId,
       status: 'pending'
     })
+  }
+
+  async findOneByReclaimSessionId({ reclaimSessionId }) {
+    return await ReclaimVerification.findOne({ reclaimSessionId })
   }
   
   async updateReclaimVerification({ 
