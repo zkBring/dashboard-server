@@ -490,12 +490,12 @@ class DispenserService {
     if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
     
     const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
-    if (!reclaimVerification) throw new BadRequestError('Reclaim verification not exists.', 'REACLAIM_VERIFICATION_NOT_EXISTS')
+    if (!reclaimVerification) throw new NotFoundError('Reclaim verification not exists.', 'REACLAIM_VERIFICATION_NOT_EXISTS')
 
     if (reclaimVerification.status !== 'success') {
       const message = reclaimVerification.message || 'Reclaim verification is pending.'
       const cause = reclaimVerification.cause || 'RECLAIM_VERIFICATION_PENDING' 
-      throw new BadRequestError(message, cause)
+      throw new ForbiddenError(message, cause)
     }
     
     return await this.getLinkByReclaimSessionId({
