@@ -8,9 +8,6 @@ const ClaimerSchema = new mongoose.Schema({
   claimerId: {
     type: String,
   },
-  handle: {
-    type: String
-  },
   reclaimProviderType: {
     type: String,
     enum: [
