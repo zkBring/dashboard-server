@@ -434,10 +434,11 @@ class DispenserService {
 
     // const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
     const isHandleWhitelisted = Handle.exists({ handle: userHandle })
+    logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
-        message: 'User is not whitelisted', 
+        message: 'User is not whitelisted',
         cause: 'USER_NOT_WHITE_LISTED',
         status: 'failed'
       })
