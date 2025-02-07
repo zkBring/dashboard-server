@@ -15,7 +15,6 @@ const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/err
 class DispenserService {
   constructor () {
     this.poppedCache = {}
-    this.dublicateReclaims = {} // mapping from the new session id to the stored session id
     this.whiteListHandlesCache = {}
     this.initializeHandlesCache()
   }
@@ -417,14 +416,11 @@ class DispenserService {
     dispenser,
     reclaimSessionId
   }) {
-    // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-    // if user has already claimed before return the old claim link
-    if (this.dublicateReclaims[reclaimSessionId]) {
-      reclaimSessionId = this.dublicateReclaims[reclaimSessionId]
-    }
+
     const dispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, reclaimSessionId)
     if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet.', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
+    
     return dispenserLink.encryptedClaimLink
   }
 
@@ -433,15 +429,12 @@ class DispenserService {
     reclaimProof,
     reclaimSessionId
   }) {
-    // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
     
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
     const userHandle = context?.extractedParameters?.trusted_username
-
-    logger.json({ userHandle })
 
     const isHandleWhitelisted = this.whiteListHandlesCache[userHandle]
     logger.json({isHandleWhitelisted})
