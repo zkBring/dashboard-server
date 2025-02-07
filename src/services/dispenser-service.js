@@ -432,9 +432,9 @@ class DispenserService {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
     
-    // const decodedBody = decodeURIComponent(reclaimProof)
-    const proof = JSON.parse(Object.keys(reclaimProof)[0])
-    const isVerifiedProof = await verifyProof(proof)
+    reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
+    
+    const isVerifiedProof = await verifyProof(reclaimProof)
     if (!isVerifiedProof) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
@@ -444,7 +444,6 @@ class DispenserService {
       })
     }
 
-    reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
     const userHandle = context?.extractedParameters?.trusted_username
