@@ -15,6 +15,9 @@ const HandleSchema = new mongoose.Schema({
       'instagram'
     ],
     default: 'instagram'
+  },
+  reclaimSessionId: {
+    type: String
   }
 },
 {
