@@ -433,7 +433,7 @@ class DispenserService {
     logger.json({ userHandle })
 
     // const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
-    const isHandleWhitelisted = Handle.exists({ handle: userHandle })
+    const isHandleWhitelisted = await Handle.exists({ handle: userHandle })
     logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
