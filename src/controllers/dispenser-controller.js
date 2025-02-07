@@ -1,10 +1,8 @@
-const stageConfig = require('../../stage-config')
 const loginService = require('../services/login-service')
 const batchService = require('../services/batch-service')
 const dispenserService = require('../services/dispenser-service')
 const whitelistService = require('../services/whitelist-service')
 const claimLinkService = require('../services/claim-link-service')
-const { ReclaimProofRequest } = require('@reclaimprotocol/js-sdk')
 const dispenserLinkService = require('../services/dispenser-link-service')
 const {
   NotFoundError,
@@ -191,62 +189,39 @@ const getCampaign = async (req, res) => {
 
 const getCampaignDataForClaimer = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
+  const { multiscanQREncCode } = req.query
+  const SERVER_URL = 'https://' + req.get('host')
+  const APP_URL = req.get('origin')
   logger.json({ controller: 'dispenser-controller', method: 'getCampaignDataForClaimer', multiscan_qr_id: multiscanQrId })
 
   if (!multiscanQrId) throw new BadRequestError('Multiscan qr id is not provided.', 'MULTISCAN_QR_ID_REQUIRED')
 
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
-
-  let reclaimVerificationURL = null
-
-  if (dispenser.reclaim) {
-    const { multiscanQREncCode } = req.query
-    const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
-    const SERVER_URL = 'https://' + req.get('host')
-    const APP_URL = req.get('origin')
-
-    logger.json({ SERVER_URL, APP_URL })
-    const jsonProofResponse = false
-    reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
-
-    const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
-    reclaimProofRequest.setRedirectUrl(redirectUrl)
-
-    // Generate the verification request URL
-    reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
-
-    const reclaimRequestJson = reclaimProofRequest.toJsonString()
-    logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
-  }
-
-  const campaign = await dispenserService.getCampaign(dispenser)
-  campaign.preview_setting = dispenser.previewSetting
-  campaign.whitelist_type = dispenser.whitelistType
-  campaign.whitelist_on = dispenser.whitelistOn
-  campaign.redirect_url = dispenser.redirectUrl
-  campaign.redirect_on = dispenser.redirectOn
+  const {
+    campaign,
+    reclaim,
+    reclaimVerificationURL
+  } = await dispenserService.getCampaignDataForClaimer({ multiscanQrId, multiscanQREncCode, SERVER_URL, APP_URL })
 
   res.json({
     success: true,
     campaign,
-    reclaim: dispenser.reclaim,
+    reclaim,
     reclaimVerificationURL
   })
 }
 
 const receiveReclaimProofs = async (req, res) => {
   let reclaimProof = req.body
+  const { 
+    multiscan_qr_id: multiscanQrId, 
+    session_id: reclaimSessionId
+  } = req.params
 
-  const { multiscan_qr_id: multiscanQrId, session_id: reclaimSessionId } = req.params
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
+  logger.json({ controller: 'dispenser-controller', method: 'receiveReclaimProofs', multiscan_qr_id: multiscanQrId, session_id: reclaimSessionId })
   logger.json({ reclaimProof, multiscanQrId, reclaimSessionId })
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
 
-  // reclaim returns proof in weird object format, so we need to extract it
-  reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
+  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
+  if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
 
   // save link to reclaim user (reclaim session id and reclaim device)
   await dispenserService.popReclaimDispenser({
@@ -264,15 +239,8 @@ const popReclaimLink = async (req, res) => {
 
   logger.json({ controller: 'dispenser-controller', method: 'popReclaimLink', multiscanQrId, reclaimSessionId })
   logger.json({ multiscanQrId, reclaimSessionId })
-
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  const encryptedClaimLink = await dispenserService.getLinkByReclaimSessionId({
-    dispenser,
-    reclaimSessionId
-  })
+  
+  const encryptedClaimLink = await dispenserService.popReclaimLink({ multiscanQrId, reclaimSessionId })
 
   res.json({
     success: true,

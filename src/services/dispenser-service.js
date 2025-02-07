@@ -3,16 +3,30 @@ const logger = require('../utils/logger')
 const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
+const Handle = require('../models/handle-model')
 const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
+const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
+const reclaimVerificationService = require('./reclaim-verification-service')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
 class DispenserService {
   constructor () {
     this.poppedCache = {}
-    this.dublicateReclaims = {} // mapping from the new session id to the stored session id
+    this.whiteListHandlesCache = {}
+    this.initializeHandlesCache()
+  }
+
+  async initializeHandlesCache() {
+    const handles = await Handle.find({}, 'handle')
+    this.whiteListHandlesCache = {}
+    handles.forEach(handleDoc => {
+      this.whiteListHandlesCache[handleDoc.handle] = true
+    })
+
+    logger.info(`Successfully loaded handles into cache: ${Object.keys(this.whiteListHandlesCache).length} docs`)
   }
 
   async create ({
@@ -361,53 +375,137 @@ class DispenserService {
     }
   }
 
+  async getCampaignDataForClaimer ({ multiscanQrId, multiscanQREncCode, SERVER_URL, APP_URL }) {
+    const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
+    if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
+  
+    let reclaimVerificationURL = null
+  
+    if (dispenser.reclaim) {
+      const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
+  
+      logger.json({ SERVER_URL, APP_URL })
+      const jsonProofResponse = false
+      reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
+  
+      const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
+      reclaimProofRequest.setRedirectUrl(redirectUrl)
+  
+      // Generate the verification request URL
+      reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
+  
+      const reclaimRequestJson = reclaimProofRequest.toJsonString()
+      logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
+    }
+  
+    const campaign = await this.getCampaign(dispenser)
+    campaign.preview_setting = dispenser.previewSetting
+    campaign.whitelist_type = dispenser.whitelistType
+    campaign.whitelist_on = dispenser.whitelistOn
+    campaign.redirect_url = dispenser.redirectUrl
+    campaign.redirect_on = dispenser.redirectOn
+    
+    return {
+      campaign,
+      reclaimVerificationURL,
+      reclaim: dispenser.reclaim
+    }
+  }
+
   async getLinkByReclaimSessionId ({
     dispenser,
     reclaimSessionId
   }) {
-    // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-    // if user has already claimed before return the old claim link
-    if (this.dublicateReclaims[reclaimSessionId]) {
-      reclaimSessionId = this.dublicateReclaims[reclaimSessionId]
-    }
+
     const dispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, reclaimSessionId)
-    if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet .', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
+    if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet.', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
+    
     return dispenserLink.encryptedClaimLink
   }
 
   async popReclaimDispenser ({
     dispenser,
-    reclaimSessionId,
-    reclaimProof
+    reclaimProof,
+    reclaimSessionId
   }) {
-    // check if dispenser is for reclaim airdrop
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-
-    // #TODO: verify reclaim body
-    // ..
-
-    // #TODO: get unique user id from proof and filter by it
-    // ..
-
-    // meanwhie just filter by user id
-    logger.json(reclaimProof)
-    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
-
-    // check if link was already popped by this reclaimDeviceId
-    const alreadyClaimed = await dispenserLinkService.findOneByDispenserIdAndReclaimDeviceId(dispenser._id, reclaimDeviceId)
-    if (alreadyClaimed) {
-      this.dublicateReclaims[reclaimSessionId] = alreadyClaimed.reclaimSessionId
-      logger.warn(`Reclaim Dispenser Link was already assigned before for this reclaim device ID. Dispenser: ${dispenser._id}. Reclaim Device Id: ${reclaimDeviceId}. New Reclaim Session Id: ${reclaimSessionId}. Existing reclaim session id: ${alreadyClaimed.reclaimSessionId}`)
-      return alreadyClaimed
+    const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
+    
+    reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
+    
+    const isVerifiedProof = await verifyProof(reclaimProof)
+    if (!isVerifiedProof) {
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'Invalid proofs data',
+        cause: 'INVALID_PROOFS_DATA',
+        status: 'failed'
+      })
     }
 
-    const dispenserLink = await this._popDispenserLink({ dispenser })
+    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
+    const context = JSON.parse(reclaimProof.claimData?.context)
+    const userHandle = context?.extractedParameters?.trusted_username
 
-    dispenserLink.reclaimProof = reclaimProof
-    dispenserLink.reclaimDeviceId = reclaimDeviceId
-    dispenserLink.reclaimSessionId = reclaimSessionId
-    await dispenserLink.save()
+    const isHandleWhitelisted = this.whiteListHandlesCache[userHandle]
+    logger.json({isHandleWhitelisted})
+    if (!isHandleWhitelisted) {
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'User is not whitelisted',
+        cause: 'USER_NOT_WHITE_LISTED',
+        status: 'failed'
+      })
+    }
+    
+    const handleDb = await Handle.findOne({ handle: userHandle })
+    if (!handleDb) {
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'Handle not exists', 
+        cause: 'HANDLE_NOT_EXISTS',
+        status: 'failed'
+      })
+    }
+
+    if (!handleDb.alreadyClaimed) {
+      const dispenserLink = await this._popDispenserLink({ dispenser })
+
+      dispenserLink.reclaimProof = reclaimProof
+      dispenserLink.reclaimDeviceId = reclaimDeviceId
+      dispenserLink.reclaimSessionId = reclaimSessionId
+      await dispenserLink.save()
+
+      handleDb.alreadyClaimed = true
+      await handleDb.save()
+    }
+
+    await reclaimVerificationService.updateReclaimVerification({
+      reclaimVerification,
+      status: 'success',
+      message: '',
+      cause: ''
+    })
+  }
+
+  async popReclaimLink({ multiscanQrId, reclaimSessionId }) {
+    const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
+    if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
+    
+    const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
+    if (!reclaimVerification) throw new NotFoundError('Reclaim verification not exists.', 'REACLAIM_VERIFICATION_NOT_EXISTS')
+
+    if (reclaimVerification.status !== 'success') {
+      const message = reclaimVerification.message || 'Reclaim verification is pending.'
+      const cause = reclaimVerification.cause || 'RECLAIM_VERIFICATION_PENDING' 
+      throw new ForbiddenError(message, cause)
+    }
+    
+    return await this.getLinkByReclaimSessionId({
+      dispenser,
+      reclaimSessionId
+    })
   }
 
   async pop ({
@@ -440,9 +538,7 @@ class DispenserService {
     return dispenserLink.encryptedClaimLink
   }
 
-  async _popDispenserLink ({
-    dispenser
-  }) {
+  async _popDispenserLink ({ dispenser }) {
     if (!dispenser.active) {
       throw new ForbiddenError('Dispenser is not active.', 'DISPENSER_IS_INACTIVE')
     }
