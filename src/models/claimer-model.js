@@ -7,6 +7,7 @@ const ClaimerSchema = new mongoose.Schema({
   },
   claimerId: {
     type: String,
+    required: true
   },
   reclaimProviderType: {
     type: String,
