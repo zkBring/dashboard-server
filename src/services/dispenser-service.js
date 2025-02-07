@@ -467,10 +467,9 @@ class DispenserService {
     dispenserLink.reclaimDeviceId = reclaimDeviceId
     dispenserLink.reclaimSessionId = reclaimSessionId
     await dispenserLink.save()
-
-    await handleDb.save({
-      alreadyClaimed: true
-    })
+    
+    handleDb.alreadyClaimed = true
+    await handleDb.save()
   }
 
   async popReclaimLink({ multiscanQrId, reclaimSessionId }) {
