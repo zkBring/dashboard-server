@@ -479,7 +479,7 @@ class DispenserService {
 
       handleDb.alreadyClaimed = true
       handleDb.reclaimSessionId = reclaimSessionId
-      handleDb.lindId = dispenserLink.linkId
+      handleDb.linkId = dispenserLink.linkId
       await handleDb.save()
     }
 

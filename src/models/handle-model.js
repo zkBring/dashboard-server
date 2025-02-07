@@ -19,7 +19,7 @@ const HandleSchema = new mongoose.Schema({
   reclaimSessionId: {
     type: String
   },
-  lindId: {
+  linkId: {
     type: String
   }
 },
