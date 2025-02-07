@@ -221,12 +221,14 @@ const receiveReclaimProofs = async (req, res) => {
 
   const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
   logger.json({ reclaimProof, multiscanQrId, reclaimSessionId })
+  logger.info(reclaimProof)
   if (!dispenser) {
     throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
   }
 
   // reclaim returns proof in weird object format, so we need to extract it
   reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
+  logger.json({jsonedProof: reclaimProof})
 
   // save link to reclaim user (reclaim session id and reclaim device)
   await dispenserService.popReclaimDispenser({

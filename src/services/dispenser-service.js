@@ -16,6 +16,7 @@ class DispenserService {
   constructor () {
     this.poppedCache = {}
     this.dublicateReclaims = {} // mapping from the new session id to the stored session id
+    this.whiteListHandlesCahche = {}
   }
 
   async create ({
@@ -428,28 +429,31 @@ class DispenserService {
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
 
-    const isFollowing = context?.extractedParameters?.following
-    const isCorrectInstagramFollowId = context?.extractedParameters?.id
+    // const isFollowing = context?.extractedParameters?.following
+    // const isCorrectInstagramFollowId = context?.extractedParameters?.id
     const userInstagramId = context?.extractedParameters?.id_23422
+    // const userHandle = context?.extractedParameters?.username
 
-    logger.json({ isFollowing, isCorrectInstagramFollowId, userInstagramId })
+    logger.json({ userInstagramId }) 
 
-    if (isFollowing !== 'true') {
-      return await reclaimVerificationService.updateReclaimVerification({
-        reclaimVerification,
-        message: 'User should follow the account to claim.', 
-        cause: 'USER_SHOULD_FOLLOW_TO_CLAIM',
-        status: 'failed'
-      })
-    }
-    if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
-      return await reclaimVerificationService.updateReclaimVerification({
-        reclaimVerification,
-        message: 'User should follow the correct account to claim.', 
-        cause: 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT',
-        status: 'failed'
-      })
-    }
+    // if (isFollowing !== 'true') {
+    //   return await reclaimVerificationService.updateReclaimVerification({
+    //     reclaimVerification,
+    //     message: 'User should follow the account to claim.', 
+    //     cause: 'USER_SHOULD_FOLLOW_TO_CLAIM',
+    //     status: 'failed'
+    //   })
+    // }
+    // if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
+    //   return await reclaimVerificationService.updateReclaimVerification({
+    //     reclaimVerification,
+    //     message: 'User should follow the correct account to claim.', 
+    //     cause: 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT',
+    //     status: 'failed'
+    //   })
+    // }
+
+    // const isHandleWhitelisted = this.whiteListHandlesCahche[]
 
     const claimerExists = await Claimer.exists({ 
       dispenser: dispenser._id, 
@@ -463,6 +467,8 @@ class DispenserService {
         status: 'failed'
       })
     }
+
+
 
     await reclaimVerificationService.updateReclaimVerification({
       reclaimVerification,
