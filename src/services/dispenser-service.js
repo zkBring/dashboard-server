@@ -8,7 +8,7 @@ const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
-const { ReclaimProofRequest } = require('@reclaimprotocol/js-sdk')
+const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
 const reclaimVerificationService = require('./reclaim-verification-service')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
@@ -432,6 +432,19 @@ class DispenserService {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
     
+    const decodedBody = decodeURIComponent(reclaimProof)
+    const proof = JSON.parse(decodedBody)
+    const isVerifiedProof = await verifyProof(proof)
+    if (!isVerifiedProof) {
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'Invalid proofs data',
+        cause: 'INVALID_PROOFS_DATA',
+        status: 'failed'
+      })
+    }
+
+    reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
     const userHandle = context?.extractedParameters?.trusted_username

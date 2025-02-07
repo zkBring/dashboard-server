@@ -212,21 +212,16 @@ const getCampaignDataForClaimer = async (req, res) => {
 
 const receiveReclaimProofs = async (req, res) => {
   let reclaimProof = req.body
-
   const { 
     multiscan_qr_id: multiscanQrId, 
     session_id: reclaimSessionId
   } = req.params
+
   logger.json({ controller: 'dispenser-controller', method: 'receiveReclaimProofs', multiscan_qr_id: multiscanQrId, session_id: reclaimSessionId })
+  logger.json({ reclaimProof, multiscanQrId, reclaimSessionId })
 
   const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  logger.json({ reclaimProof, multiscanQrId, reclaimSessionId })
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-
-  // reclaim returns proof in weird object format, so we need to extract it
-  reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
+  if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
 
   // save link to reclaim user (reclaim session id and reclaim device)
   await dispenserService.popReclaimDispenser({
