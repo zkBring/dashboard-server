@@ -444,7 +444,7 @@ class DispenserService {
       })
     }
     
-    const handleDb = Handle.findOne({ handle: userHandle })
+    const handleDb = await Handle.findOne({ handle: userHandle })
     if (handleDb.alreadyClaimed) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
