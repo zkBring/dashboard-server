@@ -17,6 +17,17 @@ class DispenserService {
     this.poppedCache = {}
     this.dublicateReclaims = {} // mapping from the new session id to the stored session id
     this.whiteListHandlesCahche = {}
+    this.initializeHandlesCache()
+  }
+
+  async initializeHandlesCache() {
+    const handles = await Handle.find({}, 'handle')
+    this.whiteListHandlesCahche = {}
+    handles.forEach(handleDoc => {
+      this.whiteListHandlesCahche[handleDoc.handle] = true
+    })
+
+    logger.info(`Successfully loaded handles into cache: ${Object.keys(this.whiteListHandlesCahche).length} docs`)
   }
 
   async create ({
@@ -413,7 +424,7 @@ class DispenserService {
       reclaimSessionId = this.dublicateReclaims[reclaimSessionId]
     }
     const dispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, reclaimSessionId)
-    if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet .', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
+    if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet.', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
     return dispenserLink.encryptedClaimLink
   }
 
@@ -432,8 +443,7 @@ class DispenserService {
 
     logger.json({ userHandle })
 
-    // const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
-    const isHandleWhitelisted = await Handle.exists({ handle: userHandle })
+    const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
     logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
@@ -445,31 +455,33 @@ class DispenserService {
     }
     
     const handleDb = await Handle.findOne({ handle: userHandle })
-    if (handleDb.alreadyClaimed) {
+    if (!handleDb) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
-        message: 'User already claimed.', 
-        cause: 'USER_ALREADY_CLAIMED',
+        message: 'Handle not exists', 
+        cause: 'HANDLE_NOT_EXISTS',
         status: 'failed'
       })
+    }
+
+    if (!handleDb.alreadyClaimed) {
+      const dispenserLink = await this._popDispenserLink({ dispenser })
+
+      dispenserLink.reclaimProof = reclaimProof
+      dispenserLink.reclaimDeviceId = reclaimDeviceId
+      dispenserLink.reclaimSessionId = reclaimSessionId
+      await dispenserLink.save()
+
+      handleDb.alreadyClaimed = true
+      await handleDb.save()
     }
 
     await reclaimVerificationService.updateReclaimVerification({
       reclaimVerification,
       status: 'success',
-      message: '', 
+      message: '',
       cause: ''
     })
-
-    const dispenserLink = await this._popDispenserLink({ dispenser })
-
-    dispenserLink.reclaimProof = reclaimProof
-    dispenserLink.reclaimDeviceId = reclaimDeviceId
-    dispenserLink.reclaimSessionId = reclaimSessionId
-    await dispenserLink.save()
-    
-    handleDb.alreadyClaimed = true
-    await handleDb.save()
   }
 
   async popReclaimLink({ multiscanQrId, reclaimSessionId }) {
