@@ -433,7 +433,7 @@ class DispenserService {
     const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
     
     // const decodedBody = decodeURIComponent(reclaimProof)
-    const proof = JSON.parse(reclaimProof)
+    const proof = JSON.parse(Object.keys(reclaimProof)[0])
     const isVerifiedProof = await verifyProof(proof)
     if (!isVerifiedProof) {
       return await reclaimVerificationService.updateReclaimVerification({
