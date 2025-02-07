@@ -16,18 +16,18 @@ class DispenserService {
   constructor () {
     this.poppedCache = {}
     this.dublicateReclaims = {} // mapping from the new session id to the stored session id
-    this.whiteListHandlesCahche = {}
+    this.whiteListHandlesCache = {}
     this.initializeHandlesCache()
   }
 
   async initializeHandlesCache() {
     const handles = await Handle.find({}, 'handle')
-    this.whiteListHandlesCahche = {}
+    this.whiteListHandlesCache = {}
     handles.forEach(handleDoc => {
-      this.whiteListHandlesCahche[handleDoc.handle] = true
+      this.whiteListHandlesCache[handleDoc.handle] = true
     })
 
-    logger.info(`Successfully loaded handles into cache: ${Object.keys(this.whiteListHandlesCahche).length} docs`)
+    logger.info(`Successfully loaded handles into cache: ${Object.keys(this.whiteListHandlesCache).length} docs`)
   }
 
   async create ({
@@ -443,7 +443,7 @@ class DispenserService {
 
     logger.json({ userHandle })
 
-    const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
+    const isHandleWhitelisted = this.whiteListHandlesCache[userHandle]
     logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
