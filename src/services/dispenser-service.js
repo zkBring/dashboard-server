@@ -2,8 +2,8 @@ const ethers = require('ethers')
 const logger = require('../utils/logger')
 const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
-const Claimer = require('../models/claimer-model')
 const Dispenser = require('../models/dispenser-model')
+const Handle = require('../models/handle-model')
 const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
@@ -428,38 +428,23 @@ class DispenserService {
     
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const context = JSON.parse(reclaimProof.claimData?.context)
+    const userHandle = context?.extractedParameters?.trusted_username
 
-    // const isFollowing = context?.extractedParameters?.following
-    // const isCorrectInstagramFollowId = context?.extractedParameters?.id
-    const userInstagramId = context?.extractedParameters?.id_23422
-    // const userHandle = context?.extractedParameters?.username
+    logger.json({ userHandle })
 
-    logger.json({ userInstagramId }) 
-
-    // if (isFollowing !== 'true') {
-    //   return await reclaimVerificationService.updateReclaimVerification({
-    //     reclaimVerification,
-    //     message: 'User should follow the account to claim.', 
-    //     cause: 'USER_SHOULD_FOLLOW_TO_CLAIM',
-    //     status: 'failed'
-    //   })
-    // }
-    // if (dispenser.instagramFollowId !== isCorrectInstagramFollowId) {
-    //   return await reclaimVerificationService.updateReclaimVerification({
-    //     reclaimVerification,
-    //     message: 'User should follow the correct account to claim.', 
-    //     cause: 'USER_SHOULD_FOLLOW_CORRECT_ACCOUNT',
-    //     status: 'failed'
-    //   })
-    // }
-
-    // const isHandleWhitelisted = this.whiteListHandlesCahche[]
-
-    const claimerExists = await Claimer.exists({ 
-      dispenser: dispenser._id, 
-      claimerId: userInstagramId 
-    })
-    if (claimerExists) {
+    // const isHandleWhitelisted = this.whiteListHandlesCahche[userHandle]
+    const isHandleWhitelisted = Handle.exists({ handle: userHandle })
+    if (!isHandleWhitelisted) {
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'User is not whitelisted', 
+        cause: 'USER_NOT_WHITE_LISTED',
+        status: 'failed'
+      })
+    }
+    
+    const handleDb = Handle.findOne({ handle: userHandle })
+    if (handleDb.alreadyClaimed) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
         message: 'User already claimed.', 
@@ -467,8 +452,6 @@ class DispenserService {
         status: 'failed'
       })
     }
-
-
 
     await reclaimVerificationService.updateReclaimVerification({
       reclaimVerification,
@@ -484,10 +467,8 @@ class DispenserService {
     dispenserLink.reclaimSessionId = reclaimSessionId
     await dispenserLink.save()
 
-    await Claimer.create({ 
-      dispenser: dispenser._id,
-      claimerId: userInstagramId, 
-      reclaimProviderType: dispenser.reclaimProviderType 
+    await handleDb.save({
+      alreadyClaimed: true
     })
   }
 
