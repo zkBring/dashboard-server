@@ -488,7 +488,7 @@ class DispenserService {
     logger.json({oldReclaimSessionId})
     if (handleDb.alreadyClaimed && (oldReclaimSessionId !== reclaimSessionId)) {
       const oldDispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, oldReclaimSessionId)
-      logger.json({oldDispenserLink: oldDispenserLink.toJSON()})
+      logger.info(oldDispenserLink)
       if (!oldDispenserLink) {
         return await reclaimVerificationService.updateReclaimVerification({
           reclaimVerification,
