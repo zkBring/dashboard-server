@@ -20,13 +20,19 @@ class DispenserService {
   }
 
   async initializeHandlesCache() {
-    const handles = await Handle.find({}, 'handle')
-    this.whiteListHandlesCache = {}
-    handles.forEach(handleDoc => {
-      this.whiteListHandlesCache[handleDoc.handle] = true
+    const handles = await Handle.find({}, 'handle dispenserId')
+    
+    handles.forEach((handleObj) => {
+      handleObj = handleObj.toObject()
+      
+      if (!this.whiteListHandlesCache[handleObj.dispenserId]) {
+        this.whiteListHandlesCache[handleObj.dispenserId] = {}
+      }
+
+      this.whiteListHandlesCache[handleObj.dispenserId][handleObj.handle.toLowerCase()] = true
     })
 
-    logger.info(`Successfully loaded handles into cache: ${Object.keys(this.whiteListHandlesCache).length} docs`)
+    logger.info(`Successfully loaded handles into cache for ${Object.keys(this.whiteListHandlesCache).length} dispensers`)
   }
 
   async create ({
@@ -425,6 +431,18 @@ class DispenserService {
     return dispenserLink.encryptedClaimLink
   }
 
+  getHandleByReclaimProviderType ({ dispenser, reclaimProof }) {
+    const context = JSON.parse(reclaimProof.claimData?.context)
+    switch (dispenser.reclaimProviderType) {
+      case 'instagram':
+        return context?.extractedParameters?.trusted_username
+      case 'x':
+        return context?.paramValues?.screen_name
+      default:
+        throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
+    }
+  }
+
   async popReclaimDispenser ({
     dispenser,
     reclaimProof,
@@ -446,10 +464,10 @@ class DispenserService {
     }
 
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
-    const context = JSON.parse(reclaimProof.claimData?.context)
-    const userHandle = context?.extractedParameters?.trusted_username
+    const userHandle = this.getHandleByReclaimProviderType({ dispenser, reclaimProof })
+    logger.json({ userHandle })
 
-    const isHandleWhitelisted = this.whiteListHandlesCache[userHandle]
+    const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle.toLowerCase()]
     logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
