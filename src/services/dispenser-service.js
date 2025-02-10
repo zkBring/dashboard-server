@@ -381,22 +381,22 @@ class DispenserService {
   
     let reclaimVerificationURL = null
   
-    // if (dispenser.reclaim) {
-    //   const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
+    if (dispenser.reclaim) {
+      const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
   
-    //   logger.json({ SERVER_URL, APP_URL })
-    //   const jsonProofResponse = false
-    //   reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
+      logger.json({ SERVER_URL, APP_URL })
+      const jsonProofResponse = false
+      reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
   
-    //   const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
-    //   reclaimProofRequest.setRedirectUrl(redirectUrl)
+      const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
+      reclaimProofRequest.setRedirectUrl(redirectUrl)
   
-    //   // Generate the verification request URL
-    //   reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
+      // Generate the verification request URL
+      reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
   
-    //   const reclaimRequestJson = reclaimProofRequest.toJsonString()
-    //   logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
-    // }
+      const reclaimRequestJson = reclaimProofRequest.toJsonString()
+      logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
+    }
   
     const campaign = await this.getCampaign(dispenser)
     campaign.preview_setting = dispenser.previewSetting
