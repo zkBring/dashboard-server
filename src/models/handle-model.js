@@ -12,9 +12,9 @@ const HandleSchema = new mongoose.Schema({
   reclaimProviderType: {
     type: String,
     enum: [
-      'instagram'
-    ],
-    default: 'instagram'
+      'instagram',
+      'x'
+    ]
   },
   reclaimSessionId: {
     type: String
