@@ -388,7 +388,7 @@ class DispenserService {
       const jsonProofResponse = false
       reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
   
-      const redirectUrl = `${APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
+      const redirectUrl = `${stageConfig.VERIFICATION_APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
       reclaimProofRequest.setRedirectUrl(redirectUrl)
   
       // Generate the verification request URL

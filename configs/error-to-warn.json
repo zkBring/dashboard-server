@@ -12,6 +12,7 @@
   "DISPENSER_NOT_FOUND": { "warn": true },
   "NO_FIELDS_TO_UPDATE": { "warn": true },
   "INVALID_CLAIM_START": { "warn": true },
+  "USER_NOT_WHITE_LISTED": {"warn": true},
   "USER_ALREADY_CLAIMED": { "warn": true },
   "SCAN_ID_NOT_VERIFIED": { "warn": true },
   "UNAUTHORIZED_REQUEST": { "warn": true },
