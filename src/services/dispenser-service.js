@@ -69,7 +69,7 @@ class DispenserService {
       params.reclaimAppId = stageConfig.RECLAIM_APP_ID
       params.reclaimAppSecret = stageConfig.RECLAIM_APP_SECRET
       params.reclaimProviderId = stageConfig.RECLAIM_PROVIDER_ID
-      params.reclaimProviderType = 'instagram'
+      params.reclaimProviderType = stageConfig.RECLAIM_PROVIDER_TYPE
     }
 
     return await this._create(params)
