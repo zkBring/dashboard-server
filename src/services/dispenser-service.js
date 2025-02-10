@@ -465,7 +465,7 @@ class DispenserService {
 
     const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const userHandle = this.getHandleByReclaimProviderType({ dispenser, reclaimProof })
-    logger.json({ userHandle })
+    logger.json({ userHandle, providerType: dispenser.reclaimProviderType })
 
     const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle?.toLowerCase()]
     logger.json({isHandleWhitelisted})
