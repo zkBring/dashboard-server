@@ -467,7 +467,7 @@ class DispenserService {
     const userHandle = this.getHandleByReclaimProviderType({ dispenser, reclaimProof })
     logger.json({ userHandle })
 
-    const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle.toLowerCase()]
+    const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle?.toLowerCase()]
     logger.json({isHandleWhitelisted})
     if (!isHandleWhitelisted) {
       return await reclaimVerificationService.updateReclaimVerification({
@@ -478,7 +478,10 @@ class DispenserService {
       })
     }
     
-    const handleDb = await Handle.findOne({ handle: userHandle })
+    const handleDb = await Handle.findOne({ 
+      handle: userHandle.toLowerCase(), 
+      dispenserId: dispenser._id.toString() 
+    })
     if (!handleDb) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,

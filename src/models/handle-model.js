@@ -21,13 +21,16 @@ const HandleSchema = new mongoose.Schema({
   },
   linkId: {
     type: String
+  },
+  dispenserId: {
+    type: String
   }
 },
 {
   timestamps: true
 })
 
-HandleSchema.index({ handle: 1 }, { unique: true })
+HandleSchema.index({ handle: 1, dispenserId: 1 }, { unique: true })
 HandleSchema.options.toJSON = {
   minimize: false,
   versionKey: false,
