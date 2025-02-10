@@ -437,7 +437,7 @@ class DispenserService {
       case 'instagram':
         return context?.extractedParameters?.trusted_username
       case 'x':
-        return context?.paramValues?.screen_name
+        return context?.extractedParameters?.screen_name
       default:
         throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
