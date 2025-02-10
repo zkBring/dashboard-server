@@ -108,7 +108,8 @@ const DispenserSchema = new mongoose.Schema({
   reclaimProviderType: {
     type: String,
     enum: [
-      'instagram'
+      'instagram',
+      'x'
     ]
   }
 },

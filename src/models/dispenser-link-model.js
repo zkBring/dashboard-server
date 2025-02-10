@@ -55,7 +55,7 @@ DispenserLinkSchema.options.toJSON = {
     delete ret.dispenserId
     delete ret.reclaimSessionId
     delete ret.encryptedClaimLink
-    delete ret.device.reclaimDeviceId
+    delete ret.reclaimDeviceId
     delete ret.createdAt
     delete ret.updatedAt
     return ret

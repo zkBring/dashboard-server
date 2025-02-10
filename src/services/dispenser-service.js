@@ -404,6 +404,7 @@ class DispenserService {
     campaign.whitelist_on = dispenser.whitelistOn
     campaign.redirect_url = dispenser.redirectUrl
     campaign.redirect_on = dispenser.redirectOn
+    campaign.provider_type = dispenser.reclaimProviderType
     
     return {
       campaign,
@@ -478,6 +479,29 @@ class DispenserService {
       await dispenserLink.save()
 
       handleDb.alreadyClaimed = true
+      handleDb.reclaimSessionId = reclaimSessionId
+      handleDb.linkId = dispenserLink.linkId
+      await handleDb.save()
+    }
+    
+    const oldReclaimSessionId = handleDb.reclaimSessionId
+    if (handleDb.alreadyClaimed && (oldReclaimSessionId !== reclaimSessionId)) {
+      const oldDispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, oldReclaimSessionId)
+      if (!oldDispenserLink) {
+        return await reclaimVerificationService.updateReclaimVerification({
+          reclaimVerification,
+          message: 'Claim link not found', 
+          cause: 'CLAIM_LINK_NOT_FOUND',
+          status: 'failed'
+        })
+      }
+
+      oldDispenserLink.reclaimProof = reclaimProof
+      oldDispenserLink.reclaimDeviceId = reclaimDeviceId
+      oldDispenserLink.reclaimSessionId = reclaimSessionId
+      await oldDispenserLink.save()
+
+      handleDb.reclaimSessionId = reclaimSessionId
       await handleDb.save()
     }
 
