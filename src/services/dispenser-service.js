@@ -437,8 +437,9 @@ class DispenserService {
     })
     if (!handleDb) throw new ForbiddenError('Handle not exists', 'HANDLE_NOT_EXISTS')
     
+    logger.json({handleDb})
     if (handleDb.linkId) {
-      const previousLink = await dispenserLinkService.findOneByLinkId(linkId)
+      const previousLink = await dispenserLinkService.findOneByLinkId(handleDb.linkId)
       if (!previousLink) throw new NotFoundError('Claim link not found.', 'CLAIM_LINK_NOT_FOUND')
       return previousLink.encryptedClaimLink
     }
