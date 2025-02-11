@@ -431,7 +431,7 @@ class DispenserService {
     if (!reclaimVerification.handle) throw new ForbiddenError('No handle in reclaim verification', 'NO_HADLE_IN_RECLAIM_VERIFICATION')
     
     const handleDb = await Handle.findOne({ 
-        handle: userHandle.toLowerCase(), 
+        handle: reclaimVerification.handle.toLowerCase(), 
         dispenserId: dispenser._id.toString()
     })
     if (!handleDb) throw new ForbiddenError('Handle not exists', 'HANDLE_NOT_EXISTS')
