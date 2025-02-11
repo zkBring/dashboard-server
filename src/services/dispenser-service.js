@@ -504,7 +504,7 @@ class DispenserService {
     })
 
     if (dispenser.whitelistOn) {
-      const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle?.toLowerCase()]
+      const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()]?.[userHandle?.toLowerCase()]
       logger.json({isHandleWhitelisted})
       
       if (!isHandleWhitelisted) {
