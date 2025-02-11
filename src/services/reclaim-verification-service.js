@@ -32,7 +32,7 @@ class reclaimVerificationService {
     reclaimVerification.status = status
     reclaimVerification.message = message
     reclaimVerification.cause = cause
-    reclaimVerification.handle = handle.toLowerCase()
+    reclaimVerification.handle = handle?.toLowerCase()
     
     return await reclaimVerification.save()
   }
