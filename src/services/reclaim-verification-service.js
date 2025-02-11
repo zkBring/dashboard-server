@@ -22,15 +22,17 @@ class reclaimVerificationService {
     return await ReclaimVerification.findOne({ reclaimSessionId })
   }
   
-  async updateReclaimVerification({ 
+  async updateReclaimVerification({
     reclaimVerification,
     message,
+    handle,
     status,
     cause
   }) {
     reclaimVerification.status = status
     reclaimVerification.message = message
     reclaimVerification.cause = cause
+    reclaimVerification.handle = handle.toLowerCase()
     
     return await reclaimVerification.save()
   }

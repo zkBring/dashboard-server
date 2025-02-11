@@ -56,6 +56,10 @@ class DispenserLinkService {
     return await DispenserLink.findOne({ dispenserId, linkNumber })
   }
 
+  async findOneByLinkId (linkId) {
+    return await DispenserLink.findOne({ linkId })
+  }
+
   async deleteLinks (dispenserId) {
     return await DispenserLink.deleteMany({ dispenserId })
   }

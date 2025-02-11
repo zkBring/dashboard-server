@@ -20,6 +20,9 @@ reclaimSessionId: {
   message: {
     type: String,
     default: ''
+  },  
+  handle: {
+    type: String
   }
 },
 {
