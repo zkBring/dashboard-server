@@ -1,9 +1,9 @@
 const ethers = require('ethers')
 const logger = require('../utils/logger')
+const userService = require('./user-service')
 const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
-const Handle = require('../models/handle-model')
 const claimApiService = require('./claim-api-service')
 const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
@@ -20,7 +20,7 @@ class DispenserService {
   }
 
   async initializeHandlesCache() {
-    const handles = await Handle.find({}, 'handle dispenserId')
+    const handles = await userService.getUserHandlesAndDispenserIds()
     
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
@@ -431,24 +431,24 @@ class DispenserService {
     if (reclaimVerification.status !== 'success') throw new ForbiddenError('Reclaim verification not success.', 'RECLAIM_VERIFICATION_NOT_SUCCESS')
     if (!reclaimVerification.handle) throw new ForbiddenError('No handle in reclaim verification', 'NO_HADLE_IN_RECLAIM_VERIFICATION')
     
-    const handleDb = await Handle.findOne({ 
+    const userDb = await userService.findOneByHandleAndDispenserId({ 
         handle: reclaimVerification.handle.toLowerCase(), 
         dispenserId: dispenser._id.toString()
     })
-    if (!handleDb) throw new ForbiddenError('Handle not exists', 'HANDLE_NOT_EXISTS')
+    if (!userDb) throw new ForbiddenError('User not exists', 'USER_NOT_EXISTS')
     
-    logger.json({handleDb})
-    if (handleDb.linkId) {
-      const previousLink = await dispenserLinkService.findOneByLinkId(handleDb.linkId)
+    logger.json({userDb})
+    if (userDb.linkId) {
+      const previousLink = await dispenserLinkService.findOneByLinkId(userDb.linkId)
       if (!previousLink) throw new NotFoundError('Claim link not found.', 'CLAIM_LINK_NOT_FOUND')
       return previousLink.encryptedClaimLink
     }
 
     const dispenserLink = await this._popDispenserLink({ dispenser })
 
-    handleDb.alreadyClaimed = true
-    handleDb.linkId = dispenserLink.linkId
-    await handleDb.save()
+    userDb.alreadyClaimed = true
+    userDb.linkId = dispenserLink.linkId
+    await userDb.save()
     
     return dispenserLink.encryptedClaimLink
   }
@@ -515,12 +515,10 @@ class DispenserService {
         })
       }
     } else {
-      // throw new ForbiddenError('Action with not whitelistOn dispenser', 'ACTION_WITH_NOT_WHITE_LIST_DISPENSER')
-      return await reclaimVerificationService.updateReclaimVerification({
-        reclaimVerification,
-        message: 'Action with not whitelistOn dispenser',
-        cause: 'ACTION_WITH_NOT_WHITE_LIST_DISPENSER',
-        status: 'failed'
+      await createUser({ 
+        handle: userHandle,
+        dispenserId: dispenser._id.toString(),
+        reclaimProviderType: dispenser.reclaimProviderType 
       })
     }
 
