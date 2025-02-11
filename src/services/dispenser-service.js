@@ -425,10 +425,10 @@ class DispenserService {
   }) {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     
-    const reclaimVerification = reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
+    const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
     logger.json({reclaimVerification})
     if (!reclaimVerification) throw new ForbiddenError('Reclaim verification not exists.', 'RECLAIM_VERIFICATION_NOT_EXISTS')
-    if (reclaimVerification.status !== 'success') throw new ForbiddenError('Reclaim verication not success.', 'RECLAIM_VERIFICATION_NOT_SUCCESS')
+    if (reclaimVerification.status !== 'success') throw new ForbiddenError('Reclaim verification not success.', 'RECLAIM_VERIFICATION_NOT_SUCCESS')
     if (!reclaimVerification.handle) throw new ForbiddenError('No handle in reclaim verification', 'NO_HADLE_IN_RECLAIM_VERIFICATION')
     
     const handleDb = await Handle.findOne({ 
