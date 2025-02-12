@@ -426,59 +426,6 @@ const updateTimeframeOn = async (req, res) => {
   })
 }
 
-const pop = async (req, res) => {
-  // const socketId = req.query.socket_id
-  // const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
-
-  // const {
-  //   message,
-  //   receiver,
-  //   chain_id: chainId,
-  //   scan_id: scanId,
-  //   scan_id_sig: scanIdSig,
-  //   whitelist_sig: whitelistSig
-  // } = req.body
-  // logger.json({ controller: 'dispenser-controller', method: 'pop', multiscan_qr_id: multiscanQrId, scan_id: scanId })
-
-  // dispenserService.verifyScanIdSignature(scanId, scanIdSig, multiscanQrId)
-  // const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  // if (!dispenser) {
-  //   throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  // }
-
-  // if (dispenser.whitelistOn) {
-  //   if (dispenser.whitelistType === 'address') {
-  //     if (!whitelistSig) {
-  //       throw new BadRequestError('Whitelist sig is not provided.', 'WHITELIST_SIG_NOT_PROVIDED')
-  //     }
-  //     if (!chainId) {
-  //       throw new BadRequestError('Chain id is not provided.', 'CHAIN_ID_NOT_PROVIDED')
-  //     }
-  //     if (!receiver) {
-  //       throw new BadRequestError('Receiver is not provided.', 'RECEIVER_NOT_PROVIDED')
-  //     }
-  //     await loginService.verifyWhitelistSig({ chainId, message, receiver, whitelistSig })
-  //   }
-
-  //   const whitelistItemDB = await whitelistService.findOne(receiver, dispenser.whitelistType, dispenser._id)
-  //   if (!whitelistItemDB) {
-  //     throw new ForbiddenError('Receiver is not whitelisted.', 'RECEIVER_NOT_WHITELISTED')
-  //   }
-  // }
-
-  // const encryptedClaimLink = await dispenserService.pop({
-  //   scanId,
-  //   receiver,
-  //   socketId,
-  //   dispenser
-  // })
-
-  // res.json({
-  //   success: true,
-  //   encrypted_claim_link: encryptedClaimLink
-  // })
-}
-
 const getDispenserSettings = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id
   logger.json({ controller: 'dispenser-controller', method: 'getDispenserSettings', multiscan_qr_id: multiscanQrId })
@@ -521,7 +468,6 @@ const updateReclaimData = async (req, res) => {
 }
 
 module.exports = {
-  pop,
   uploadLinks,
   updateLinks,
   getCampaign,

@@ -298,7 +298,6 @@ class DispenserService {
     redirectUrl,
     timeframeOn,
     reclaimAppId,
-    whitelistType,
     claimDuration,
     reclaimAppSecret,
     reclaimProviderId,
@@ -321,7 +320,6 @@ class DispenserService {
           redirectUrl,
           reclaimAppId,
           claimDuration,
-          whitelistType,
           reclaimAppSecret,
           reclaimProviderId,
           instagramFollowId
@@ -341,36 +339,6 @@ class DispenserService {
       if (claimStart > currentDate) throw new ForbiddenError('Claim has not started yet.', 'DISPENSER_NOT_STARTED')
       if (!claimFinish) return
       if (currentDate > claimFinish) throw new ForbiddenError('Claim is over.', 'DISPENSER_EXPIRED')
-    }
-  }
-
-  verifyScanIdSignature (scanId, scanIdSig, multiscanQrId) {
-    const message = `${stageConfig.SCAN_ID_SIG_MESSAGE} ${scanId}`
-    const decodedAddress = ethers.utils.verifyMessage(message, scanIdSig)
-    if (decodedAddress.toLowerCase() !== multiscanQrId.toLowerCase()) {
-      throw new ForbiddenError('Scan id signature is not verified.', 'SCAN_ID_NOT_VERIFIED')
-    }
-    return true
-  }
-
-  async addWhitelist ({
-    whitelist,
-    dispenserId,
-    whitelistOn,
-    whitelistType
-  }) {
-    const foundWhitelistItem = await whitelistService.findOneByDispenserId(dispenserId)
-    if (foundWhitelistItem) {
-      await whitelistService.deleteItemsByDispenserId(dispenserId)
-    }
-
-    const whitelistDB = await whitelistService.create({ dispenserId, whitelist, whitelistType })
-    const updatedDispenser = await this.updateDispenser({ dispenserId, whitelistType, whitelistOn })
-    updatedDispenser.whitelist_count = whitelistDB.length
-
-    return {
-      dispenser: updatedDispenser,
-      whitelist: whitelistDB
     }
   }
 
@@ -541,36 +509,6 @@ class DispenserService {
     })
   }
 
-  async pop ({
-    scanId,
-    receiver,
-    socketId,
-    dispenser
-  }) {
-    if (dispenser.reclaim) throw new ForbiddenError('Non-Reclaim action for reclaim dispenser.', 'NON_RECLAIM_ACTION_FOR_RECLAIM_DISPENSER')
-
-    // check if dispenser has been scanned before by this device
-    let previousLink = await dispenserLinkService.findOneByDispenserIdAndScanId(dispenser._id, scanId)
-    if (previousLink) return previousLink.encryptedClaimLink
-
-    // check if dispenser is whitelisted
-    if (dispenser.whitelistOn) {
-      if (dispenser.whitelistType === 'address') {
-        previousLink = await dispenserLinkService.findOneByDispenserIdAndReceiver(dispenser._id, receiver)
-        if (previousLink) return previousLink.encryptedClaimLink
-      }
-    }
-
-    const dispenserLink = await this._popDispenserLink({ dispenser })
-
-    dispenserLink.scanId = scanId
-    if (receiver) dispenserLink.receiver = receiver.toLowerCase()
-    await dispenserLink.save()
-
-    if (dispenser.dynamic) this._triggerSuccesfullScanEvent({ socketId })
-    return dispenserLink.encryptedClaimLink
-  }
-
   async _popDispenserLink ({ dispenser }) {
     if (!dispenser.active) {
       throw new ForbiddenError('Dispenser is not active.', 'DISPENSER_IS_INACTIVE')
@@ -593,22 +531,6 @@ class DispenserService {
     dispenser.popped = popped
     dispenser.save()
     return dispenserLink
-  }
-
-  async _triggerSuccesfullScanEvent ({ socketId }) {
-    const config = {
-      headers: { 'api-secret-key': `${stageConfig.SOCKET_SERVER_API_KEY}` }
-    }
-
-    try {
-      fetch(`${stageConfig.SOCKET_SERVER_URL}/scan?socket_id=${socketId}`, {
-        method: 'GET',
-        headers: config.headers
-      })
-    } catch (err) {
-      const errorMessage = err.message || err.reason || 'Unknown error'
-      logger.error(`Something went wrong while triggering socket server. Error: ${errorMessage}`)
-    }
   }
 
   getQrCampaignType (dispenser) {

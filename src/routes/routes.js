@@ -172,13 +172,6 @@ const routes = {
       celebrateSchema: 'updateWhitelistOn'
     }
   },
-  '/dashboard/dispensers/pop/multiscan-qrs/:multiscan_qr_id': {
-    post: {
-      controller: 'dispenser-controller',
-      method: 'pop',
-      celebrateSchema: 'pop'
-    }
-  },
   '/dashboard/dispensers/pop-reclaim/multiscan-qrs/:multiscan_qr_id': {
     post: {
       controller: 'dispenser-controller',
