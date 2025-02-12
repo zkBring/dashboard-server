@@ -3,13 +3,13 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getCampaignById',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'checkCampaignId'
     },
     patch: {
       controller: 'campaign-controller',
       method: 'updateCampaign',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateCampaign'
     }
   },
@@ -17,7 +17,7 @@ const routes = {
     post: {
       controller: 'campaign-controller',
       method: 'addLinksBatch',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'addLinksBatch'
     }
   },
@@ -25,7 +25,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatches',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'checkCampaignId'
     }
   },
@@ -33,7 +33,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatchById',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'getLinksBatchById'
     }
   },
@@ -41,7 +41,7 @@ const routes = {
     post: {
       controller: 'campaign-controller',
       method: 'addLinksToBatch',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'addLinksToBatch'
     }
   },
@@ -49,89 +49,22 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksReport',
-      authType: ['JWT', 'API_KEY', 'CAMPAIGN_SIG'],
+      authType: ['JWT', 'CAMPAIGN_SIG'],
       celebrateSchema: 'checkCampaignId'
-    }
-  },
-  '/dashboard/QR/sets': {
-    post: {
-      controller: 'set-controller',
-      method: 'createQRSet',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'createQRSet'
-    },
-    get: {
-      controller: 'set-controller',
-      method: 'getQRSets',
-      authType: ['JWT', 'API_KEY']
-    }
-  },
-  '/dashboard/QR/sets/:set_id': {
-    get: {
-      controller: 'set-controller',
-      method: 'getQRSetById',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'checkSetId'
-    },
-    patch: {
-      controller: 'set-controller',
-      method: 'updateQRSet',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'updateQRSet'
-    }
-  },
-  '/dashboard/QR/sets/:set_id/QRs': {
-    get: {
-      controller: 'set-controller',
-      method: 'getQRsBySetId',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'checkSetId'
-    }
-  },
-  '/dashboard/QR/sets/:set_id/update-status': {
-    patch: {
-      controller: 'set-controller',
-      method: 'updateStatus',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'updateStatus'
-    }
-  },
-  '/dashboard/QR/sets/:set_id/update-quantity': {
-    patch: {
-      controller: 'set-controller',
-      method: 'updateQuantity',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'updateQuantity'
-    }
-  },
-  '/dashboard/QR/sets/:set_id/links-mapping': {
-    get: {
-      controller: 'set-controller',
-      method: 'getMappedLinks',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'checkSetId'
-    }
-  },
-  '/dashboard/QR/sets/:set_id/map-links': {
-    patch: {
-      controller: 'set-controller',
-      method: 'mapLinks',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'mapLinks'
     }
   },
   '/dashboard/linkdrop/campaigns': {
     post: {
       controller: 'campaign-controller',
       method: 'createCampaign',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'createCampaign'
 
     },
     get: {
       controller: 'campaign-controller',
       method: 'getCampaigns',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'getCampaigns'
     }
   },
@@ -139,7 +72,7 @@ const routes = {
     post: {
       controller: 'claim-link-controller',
       method: 'deactivateClaimLink',
-      authType: ['CAMPAIGN_SIG', 'API_KEY'],
+      authType: ['CAMPAIGN_SIG',],
       celebrateSchema: 'checkLinkId'
     }
   },
@@ -147,7 +80,7 @@ const routes = {
     post: {
       controller: 'claim-link-controller',
       method: 'reactivateClaimLink',
-      authType: ['CAMPAIGN_SIG', 'API_KEY'],
+      authType: ['CAMPAIGN_SIG',],
       celebrateSchema: 'checkLinkId'
     }
   },
@@ -155,12 +88,12 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getDispensers',
-      authType: ['JWT', 'API_KEY']
+      authType: ['JWT',]
     },
     post: {
       controller: 'dispenser-controller',
       method: 'createDispenser',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'createDispenser'
     }
   },
@@ -168,12 +101,12 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getDispenserById',
-      authType: ['JWT', 'API_KEY']
+      authType: ['JWT',]
     },
     patch: {
       controller: 'dispenser-controller',
       method: 'updateDispenser',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateDispenser'
     }
   },
@@ -181,7 +114,7 @@ const routes = {
     patch: {
       controller: 'dispenser-controller',
       method: 'updateDispenserStatus',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateDispenserStatus'
     }
   },
@@ -189,7 +122,7 @@ const routes = {
     patch: {
       controller: 'dispenser-controller',
       method: 'updateRedirectUrl',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateRedirectUrl'
     }
   },
@@ -197,7 +130,7 @@ const routes = {
     patch: {
       controller: 'dispenser-controller',
       method: 'updateRedirectOn',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateRedirectOn'
     }
   },
@@ -205,13 +138,13 @@ const routes = {
     post: {
       controller: 'dispenser-controller',
       method: 'uploadLinks',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'uploadLinks'
     },
     put: {
       controller: 'dispenser-controller',
       method: 'updateLinks',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateLinks'
     }
   },
@@ -219,7 +152,7 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getLinksReport',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'getLinksReport'
     }
   },
@@ -227,7 +160,7 @@ const routes = {
     patch: {
       controller: 'dispenser-controller',
       method: 'updateTimeframeOn',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateTimeframeOn'
     }
   },
@@ -235,27 +168,8 @@ const routes = {
     patch: {
       controller: 'dispenser-controller',
       method: 'updateWhitelistOn',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateWhitelistOn'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/whitelist': {
-    get: {
-      controller: 'dispenser-controller',
-      method: 'getWhitelist',
-      authType: ['JWT', 'API_KEY']
-    },
-    post: {
-      controller: 'dispenser-controller',
-      method: 'addWhitelist',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'addWhitelist'
-    },
-    put: {
-      controller: 'dispenser-controller',
-      method: 'addWhitelist',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'updateWhitelist'
     }
   },
   '/dashboard/dispensers/pop/multiscan-qrs/:multiscan_qr_id': {
@@ -300,63 +214,21 @@ const routes = {
     put: {
       controller: 'dispenser-controller',
       method: 'updateReclaimData',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'updateReclaimData'
-    }
-  },
-  '/dashboard/collections': {
-    get: {
-      controller: 'token-collection-controller',
-      method: 'getCollections',
-      authType: ['JWT', 'API_KEY']
-    },
-    post: {
-      controller: 'token-collection-controller',
-      method: 'createCollection',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'createCollection'
-    }
-  },
-  '/dashboard/collections/:collection_id': {
-    get: {
-      controller: 'token-collection-controller',
-      method: 'getCollectionById',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'checkCollectionId'
-    },
-    patch: {
-      controller: 'token-collection-controller',
-      method: 'updateCollection',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'updateCollection'
-    }
-  },
-  '/dashboard/collections/:collection_id/token': {
-    post: {
-      controller: 'token-collection-controller',
-      method: 'addTokenToCollection',
-      authType: ['JWT', 'API_KEY'],
-      celebrateSchema: 'addTokenToCollection'
     }
   },
   '/dashboard/dashboard-key': {
     get: {
       controller: 'dashboard-key-controller',
       method: 'getEncryptedKey',
-      authType: ['JWT', 'API_KEY']
+      authType: ['JWT',]
     },
     post: {
       controller: 'dashboard-key-controller',
       method: 'addEncryptedKey',
-      authType: ['JWT', 'API_KEY'],
+      authType: ['JWT',],
       celebrateSchema: 'addEncryptedKey'
-    }
-  },
-  '/user/QR/:qr_id': {
-    get: {
-      controller: 'receiver-controller',
-      method: 'getLink',
-      celebrateSchema: 'checkQrId'
     }
   },
   '/claim-links/:link_id': {
@@ -413,13 +285,6 @@ const routes = {
       controller: 'login-controller',
       method: 'getNonce',
       celebrateSchema: 'getNonce'
-    }
-  },
-  '/dashboard/qr-manager': {
-    get: {
-      controller: 'qr-manager-controller',
-      method: 'getQrCampaigns',
-      authType: ['JWT', 'API_KEY']
     }
   }
 }

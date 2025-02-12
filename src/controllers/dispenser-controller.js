@@ -1,7 +1,5 @@
-const loginService = require('../services/login-service')
 const batchService = require('../services/batch-service')
 const dispenserService = require('../services/dispenser-service')
-const whitelistService = require('../services/whitelist-service')
 const claimLinkService = require('../services/claim-link-service')
 const dispenserLinkService = require('../services/dispenser-link-service')
 const {
@@ -387,64 +385,6 @@ const updateRedirectOn = async (req, res) => {
   })
 }
 
-const getWhitelist = async (req, res) => {
-  const dispenserId = req.params.dispenser_id
-  const userAddress = req.userAddress.toLowerCase()
-  logger.json({ controller: 'dispenser-controller', method: 'getWhitelist', dispenser_id: dispenserId })
-
-  if (!dispenserId) {
-    throw new BadRequestError('Dispenser id is not provided.', 'DISPENSER_ID_REQUIRED')
-  }
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const whitelist = await whitelistService.getWhitelist(dispenser)
-
-  res.json({
-    success: true,
-    whitelist_type: dispenser.whitelistType,
-    whitelist
-  })
-}
-
-const addWhitelist = async (req, res) => {
-  const dispenserId = req.params.dispenser_id
-  const userAddress = req.userAddress.toLowerCase()
-  const {
-    whitelist,
-    whitelist_on: whitelistOn,
-    whitelist_type: whitelistType
-  } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'addWhitelist', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.addWhitelist({
-    whitelist,
-    dispenserId,
-    whitelistOn,
-    whitelistType
-  })
-
-  res.json({
-    success: true,
-    dispenser: updatedDispenser.dispenser,
-    whitelist: updatedDispenser.whitelist
-  })
-}
-
 const updateWhitelistOn = async (req, res) => {
   const userAddress = req.userAddress.toLowerCase()
   const dispenserId = req.params.dispenser_id
@@ -487,56 +427,56 @@ const updateTimeframeOn = async (req, res) => {
 }
 
 const pop = async (req, res) => {
-  const socketId = req.query.socket_id
-  const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
+  // const socketId = req.query.socket_id
+  // const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
 
-  const {
-    message,
-    receiver,
-    chain_id: chainId,
-    scan_id: scanId,
-    scan_id_sig: scanIdSig,
-    whitelist_sig: whitelistSig
-  } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'pop', multiscan_qr_id: multiscanQrId, scan_id: scanId })
+  // const {
+  //   message,
+  //   receiver,
+  //   chain_id: chainId,
+  //   scan_id: scanId,
+  //   scan_id_sig: scanIdSig,
+  //   whitelist_sig: whitelistSig
+  // } = req.body
+  // logger.json({ controller: 'dispenser-controller', method: 'pop', multiscan_qr_id: multiscanQrId, scan_id: scanId })
 
-  dispenserService.verifyScanIdSignature(scanId, scanIdSig, multiscanQrId)
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
+  // dispenserService.verifyScanIdSignature(scanId, scanIdSig, multiscanQrId)
+  // const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
+  // if (!dispenser) {
+  //   throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
+  // }
 
-  if (dispenser.whitelistOn) {
-    if (dispenser.whitelistType === 'address') {
-      if (!whitelistSig) {
-        throw new BadRequestError('Whitelist sig is not provided.', 'WHITELIST_SIG_NOT_PROVIDED')
-      }
-      if (!chainId) {
-        throw new BadRequestError('Chain id is not provided.', 'CHAIN_ID_NOT_PROVIDED')
-      }
-      if (!receiver) {
-        throw new BadRequestError('Receiver is not provided.', 'RECEIVER_NOT_PROVIDED')
-      }
-      await loginService.verifyWhitelistSig({ chainId, message, receiver, whitelistSig })
-    }
+  // if (dispenser.whitelistOn) {
+  //   if (dispenser.whitelistType === 'address') {
+  //     if (!whitelistSig) {
+  //       throw new BadRequestError('Whitelist sig is not provided.', 'WHITELIST_SIG_NOT_PROVIDED')
+  //     }
+  //     if (!chainId) {
+  //       throw new BadRequestError('Chain id is not provided.', 'CHAIN_ID_NOT_PROVIDED')
+  //     }
+  //     if (!receiver) {
+  //       throw new BadRequestError('Receiver is not provided.', 'RECEIVER_NOT_PROVIDED')
+  //     }
+  //     await loginService.verifyWhitelistSig({ chainId, message, receiver, whitelistSig })
+  //   }
 
-    const whitelistItemDB = await whitelistService.findOne(receiver, dispenser.whitelistType, dispenser._id)
-    if (!whitelistItemDB) {
-      throw new ForbiddenError('Receiver is not whitelisted.', 'RECEIVER_NOT_WHITELISTED')
-    }
-  }
+  //   const whitelistItemDB = await whitelistService.findOne(receiver, dispenser.whitelistType, dispenser._id)
+  //   if (!whitelistItemDB) {
+  //     throw new ForbiddenError('Receiver is not whitelisted.', 'RECEIVER_NOT_WHITELISTED')
+  //   }
+  // }
 
-  const encryptedClaimLink = await dispenserService.pop({
-    scanId,
-    receiver,
-    socketId,
-    dispenser
-  })
+  // const encryptedClaimLink = await dispenserService.pop({
+  //   scanId,
+  //   receiver,
+  //   socketId,
+  //   dispenser
+  // })
 
-  res.json({
-    success: true,
-    encrypted_claim_link: encryptedClaimLink
-  })
+  // res.json({
+  //   success: true,
+  //   encrypted_claim_link: encryptedClaimLink
+  // })
 }
 
 const getDispenserSettings = async (req, res) => {
@@ -585,8 +525,6 @@ module.exports = {
   uploadLinks,
   updateLinks,
   getCampaign,
-  getWhitelist,
-  addWhitelist,
   getDispensers,
   getLinksReport,
   popReclaimLink,

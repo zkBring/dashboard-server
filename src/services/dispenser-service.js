@@ -1,11 +1,9 @@
 const ethers = require('ethers')
 const logger = require('../utils/logger')
 const userService = require('./user-service')
-const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
 const claimApiService = require('./claim-api-service')
-const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
 const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
@@ -252,27 +250,15 @@ class DispenserService {
     const tokenId = populatedLink.claimParams?.tokenId
     const tokenAmount = populatedLink.claimParams?.tokenAmount
     const campaign = populatedLink?.campaign
-    let isLinkdropToken = false
-    let token
-    if (campaign?.collectionId !== null) {
-      token = await tokenService.findOneByTokenAndCollectionId({
-        tokenId,
-        tokenCollection: campaign?.collectionId
-      })
-      isLinkdropToken = true
-    }
 
     return {
       token_id: tokenId,
       title: campaign.title,
-      token_name: token?.name,
       wallet: campaign.wallet,
       campaign_id: campaign._id,
       token_amount: tokenAmount,
       chain_id: campaign.chainId,
-      token_image: token?.thumbnail,
       sponsored: campaign.sponsored,
-      linkdrop_token: isLinkdropToken,
       token_address: campaign.tokenAddress,
       redirect_on: dispenserObj.redirectOn,
       redirect_url: dispenserObj.redirectUrl,

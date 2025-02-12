@@ -1,8 +1,4 @@
 const stageConfig = require('./stage-config')
-const tracer = require('dd-trace').init({
-  logInjection: true,
-  version: stageConfig.DD_VERSION
-})
 const connectDB = require('./src/models/connectDB')
 const express = require('express')
 const app = express()
