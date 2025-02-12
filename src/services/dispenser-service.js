@@ -20,15 +20,23 @@ class DispenserService {
   }
 
   async initializeHandlesCache() {
+    const dispensers = await Dispenser.find({}, '_id whitelistOn')
+    const whitelistDispensers = new Set(
+        dispensers
+            .filter(dispenser => dispenser.whitelistOn)
+            .map(dispenser => dispenser._id.toString())
+    )
+
     const handles = await userService.getUserHandlesAndDispenserIds()
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
       
-      if (!this.whiteListHandlesCache[handleObj.dispenserId]) {
-        this.whiteListHandlesCache[handleObj.dispenserId] = {}
+      if (whitelistDispensers.has(handleObj.dispenserId)) {
+          if (!this.whiteListHandlesCache[handleObj.dispenserId]) {
+              this.whiteListHandlesCache[handleObj.dispenserId] = {}
+          }
+          this.whiteListHandlesCache[handleObj.dispenserId][handleObj.handle.toLowerCase()] = true
       }
-
-      this.whiteListHandlesCache[handleObj.dispenserId][handleObj.handle.toLowerCase()] = true
     })
 
     logger.info(`Successfully loaded handles into cache for ${Object.keys(this.whiteListHandlesCache).length} dispensers`)
