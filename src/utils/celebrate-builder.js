@@ -714,7 +714,10 @@ const celebrateMiddleware = celebrateSchema => {
         }),
         reclaim_provider_id: Joi.string().optional().allow("").messages({
           'string.base': 'RECLAIM_PROVIDER_ID_WRONG_TYPE'
-        })
+        }),
+        instagram_follow_id: Joi.string().optional().allow("").messages({
+          'string.base': 'INSTAGRAM_FOLLOW_ID_WRONG_TYPE'
+        }),
       })
     }, { abortEarly: false, mode: 'FULL' })
   }
