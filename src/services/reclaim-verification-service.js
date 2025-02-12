@@ -21,8 +21,17 @@ class reclaimVerificationService {
   async findOneByReclaimSessionId({ reclaimSessionId }) {
     return await ReclaimVerification.findOne({ reclaimSessionId })
   }
+
+  async updateReclaimVerificationHandle ({
+    reclaimVerification,
+    handle
+  }) {
+    reclaimVerification.handle = handle.toLowerCase()
+
+    return await reclaimVerification.save()
+  }
   
-  async updateReclaimVerification({ 
+  async updateReclaimVerification({
     reclaimVerification,
     message,
     status,

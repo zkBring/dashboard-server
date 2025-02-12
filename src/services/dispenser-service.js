@@ -424,9 +424,31 @@ class DispenserService {
     reclaimSessionId
   }) {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
+    
+    const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
+    logger.json({reclaimVerification})
+    if (!reclaimVerification) throw new ForbiddenError('Reclaim verification not exists.', 'RECLAIM_VERIFICATION_NOT_EXISTS')
+    if (reclaimVerification.status !== 'success') throw new ForbiddenError('Reclaim verification not success.', 'RECLAIM_VERIFICATION_NOT_SUCCESS')
+    if (!reclaimVerification.handle) throw new ForbiddenError('No handle in reclaim verification', 'NO_HADLE_IN_RECLAIM_VERIFICATION')
+    
+    const handleDb = await Handle.findOne({ 
+        handle: reclaimVerification.handle.toLowerCase(), 
+        dispenserId: dispenser._id.toString()
+    })
+    if (!handleDb) throw new ForbiddenError('Handle not exists', 'HANDLE_NOT_EXISTS')
+    
+    logger.json({handleDb})
+    if (handleDb.linkId) {
+      const previousLink = await dispenserLinkService.findOneByLinkId(handleDb.linkId)
+      if (!previousLink) throw new NotFoundError('Claim link not found.', 'CLAIM_LINK_NOT_FOUND')
+      return previousLink.encryptedClaimLink
+    }
 
-    const dispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, reclaimSessionId)
-    if (!dispenserLink) throw new ForbiddenError('Reclaim drop was not redeemed yet.', 'RECLAIM_DROP_WAS_NOT_REDEEMED_YET')
+    const dispenserLink = await this._popDispenserLink({ dispenser })
+
+    handleDb.alreadyClaimed = true
+    handleDb.linkId = dispenserLink.linkId
+    await handleDb.save()
     
     return dispenserLink.encryptedClaimLink
   }
@@ -463,67 +485,43 @@ class DispenserService {
       })
     }
 
-    const reclaimDeviceId = reclaimProof.claimData.owner.toLowerCase()
     const userHandle = this.getHandleByReclaimProviderType({ dispenser, reclaimProof })
     logger.json({ userHandle: userHandle, providerType: dispenser.reclaimProviderType })
 
-    const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()][userHandle?.toLowerCase()]
-    logger.json({isHandleWhitelisted})
-    if (!isHandleWhitelisted) {
+    if (!userHandle) {
       return await reclaimVerificationService.updateReclaimVerification({
         reclaimVerification,
-        message: 'User is not whitelisted',
-        cause: 'USER_NOT_WHITE_LISTED',
+        message: 'No user handle in proof',
+        cause: 'NO_USER_HANDLE_IN_PROOF',
         status: 'failed'
       })
     }
-    
-    const handleDb = await Handle.findOne({ 
-      handle: userHandle.toLowerCase(), 
-      dispenserId: dispenser._id.toString() 
+
+    await reclaimVerificationService.updateReclaimVerificationHandle({
+      reclaimVerification,
+      handle: userHandle
     })
-    if (!handleDb) {
-      return await reclaimVerificationService.updateReclaimVerification({
-        reclaimVerification,
-        message: 'Handle not exists', 
-        cause: 'HANDLE_NOT_EXISTS',
-        status: 'failed'
-      })
-    }
 
-    if (!handleDb.alreadyClaimed) {
-      const dispenserLink = await this._popDispenserLink({ dispenser })
-
-      dispenserLink.reclaimProof = reclaimProof
-      dispenserLink.reclaimDeviceId = reclaimDeviceId
-      dispenserLink.reclaimSessionId = reclaimSessionId
-      await dispenserLink.save()
-
-      handleDb.alreadyClaimed = true
-      handleDb.reclaimSessionId = reclaimSessionId
-      handleDb.linkId = dispenserLink.linkId
-      await handleDb.save()
-    }
-    
-    const oldReclaimSessionId = handleDb.reclaimSessionId
-    if (handleDb.alreadyClaimed && (oldReclaimSessionId !== reclaimSessionId)) {
-      const oldDispenserLink = await dispenserLinkService.findOneByDispenserIdAndReclaimSessionId(dispenser._id, oldReclaimSessionId)
-      if (!oldDispenserLink) {
+    if (dispenser.whitelistOn) {
+      const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()]?.[userHandle?.toLowerCase()]
+      logger.json({isHandleWhitelisted})
+      
+      if (!isHandleWhitelisted) {
         return await reclaimVerificationService.updateReclaimVerification({
           reclaimVerification,
-          message: 'Claim link not found', 
-          cause: 'CLAIM_LINK_NOT_FOUND',
+          message: 'User is not whitelisted',
+          cause: 'USER_NOT_WHITE_LISTED',
           status: 'failed'
         })
       }
-
-      oldDispenserLink.reclaimProof = reclaimProof
-      oldDispenserLink.reclaimDeviceId = reclaimDeviceId
-      oldDispenserLink.reclaimSessionId = reclaimSessionId
-      await oldDispenserLink.save()
-
-      handleDb.reclaimSessionId = reclaimSessionId
-      await handleDb.save()
+    } else {
+      // throw new ForbiddenError('Action with not whitelistOn dispenser', 'ACTION_WITH_NOT_WHITE_LIST_DISPENSER')
+      return await reclaimVerificationService.updateReclaimVerification({
+        reclaimVerification,
+        message: 'Action with not whitelistOn dispenser',
+        cause: 'ACTION_WITH_NOT_WHITE_LIST_DISPENSER',
+        status: 'failed'
+      })
     }
 
     await reclaimVerificationService.updateReclaimVerification({
