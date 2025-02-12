@@ -21,7 +21,6 @@ class DispenserService {
 
   async initializeHandlesCache() {
     const handles = await userService.getUserHandlesAndDispenserIds()
-    
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
       
@@ -436,8 +435,7 @@ class DispenserService {
         dispenserId: dispenser._id.toString()
     })
     if (!userDb) throw new ForbiddenError('User not exists', 'USER_NOT_EXISTS')
-    
-    logger.json({userDb})
+
     if (userDb.linkId) {
       const previousLink = await dispenserLinkService.findOneByLinkId(userDb.linkId)
       if (!previousLink) throw new NotFoundError('Claim link not found.', 'CLAIM_LINK_NOT_FOUND')
@@ -515,7 +513,7 @@ class DispenserService {
         })
       }
     } else {
-      await createUser({ 
+      await userService.createUser({ 
         handle: userHandle,
         dispenserId: dispenser._id.toString(),
         reclaimProviderType: dispenser.reclaimProviderType 

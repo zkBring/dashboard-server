@@ -44,5 +44,5 @@ UserSchema.options.toJSON = {
     return ret
   }
 }
-const User = mongoose.model('Handle', UserSchema)
+const User = mongoose.model('User', UserSchema)
 module.exports = User
