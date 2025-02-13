@@ -519,11 +519,18 @@ class DispenserService {
         })
       }
     } else {
-      await userService.createUser({ 
+      const userDb = await userService.findOneByHandleAndDispenserId({
         handle: userHandle.toLowerCase(),
-        dispenserId: dispenser._id.toString(),
-        reclaimProviderType: dispenser.reclaimProviderType 
+        dispenserId: dispenser._id.toString()
       })
+
+      if (!userDb) {
+        await userService.createUser({ 
+          handle: userHandle.toLowerCase(),
+          dispenserId: dispenser._id.toString(),
+          reclaimProviderType: dispenser.reclaimProviderType
+        })
+      }
     }
 
     await reclaimVerificationService.updateReclaimVerification({

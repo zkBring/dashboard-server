@@ -2,9 +2,6 @@ const User = require('../models/user-model')
 
 class UserService {
   async createUser ({ handle, dispenserId, reclaimProviderType }) {
-    const user = await User.findOne({ handle: handle.toLowerCase(), dispenserId })
-    if (user) return user
-    
     return await User.create({
       handle: handle.toLowerCase(),
       dispenserId,
