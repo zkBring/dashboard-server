@@ -522,7 +522,7 @@ class DispenserService {
       }
     } else {
       await userService.createUser({ 
-        handle: userHandle,
+        handle: userHandle.toLowerCase(),
         dispenserId: dispenser._id.toString(),
         reclaimProviderType: dispenser.reclaimProviderType 
       })

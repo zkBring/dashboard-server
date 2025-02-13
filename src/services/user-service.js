@@ -6,7 +6,7 @@ class UserService {
     if (user) return user
     
     return await User.create({
-      handle,
+      handle: handle.toLowerCase(),
       dispenserId,
       reclaimProviderType
     })
