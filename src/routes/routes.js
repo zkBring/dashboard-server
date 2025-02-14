@@ -86,30 +86,6 @@ const routes = {
       celebrateSchema: 'updateDispenser'
     }
   },
-  '/dashboard/dispensers/:dispenser_id/update-status': {
-    patch: {
-      controller: 'dispenser-controller',
-      method: 'updateDispenserStatus',
-      authType: ['JWT',],
-      celebrateSchema: 'updateDispenserStatus'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/redirect-link': {
-    patch: {
-      controller: 'dispenser-controller',
-      method: 'updateRedirectUrl',
-      authType: ['JWT',],
-      celebrateSchema: 'updateRedirectUrl'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/redirect-on': {
-    patch: {
-      controller: 'dispenser-controller',
-      method: 'updateRedirectOn',
-      authType: ['JWT',],
-      celebrateSchema: 'updateRedirectOn'
-    }
-  },
   '/dashboard/dispensers/:dispenser_id/upload-links': {
     post: {
       controller: 'dispenser-controller',
@@ -130,22 +106,6 @@ const routes = {
       method: 'getLinksReport',
       authType: ['JWT',],
       celebrateSchema: 'getLinksReport'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/timeframe-on': {
-    patch: {
-      controller: 'dispenser-controller',
-      method: 'updateTimeframeOn',
-      authType: ['JWT',],
-      celebrateSchema: 'updateTimeframeOn'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/whitelist-on': {
-    patch: {
-      controller: 'dispenser-controller',
-      method: 'updateWhitelistOn',
-      authType: ['JWT',],
-      celebrateSchema: 'updateWhitelistOn'
     }
   },
   '/dashboard/dispensers/pop-reclaim/multiscan-qrs/:multiscan_qr_id': {
@@ -171,14 +131,6 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getDispenserSettings'
-    }
-  },
-  '/dashboard/dispensers/:dispenser_id/reclaim': {
-    put: {
-      controller: 'dispenser-controller',
-      method: 'updateReclaimData',
-      authType: ['JWT',],
-      celebrateSchema: 'updateReclaimData'
     }
   },
   '/dashboard/dashboard-key': {

@@ -248,31 +248,6 @@ const celebrateMiddleware = celebrateSchema => {
     }, { abortEarly: false, mode: 'FULL' })
   }
 
-  if (celebrateSchema === 'addLinksBatch') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        campaign_id: Joi.string().required().messages({
-          'string.base': 'CAMPAIGN_ID_WRONG_TYPE',
-          'string.empty': 'CAMPAIGN_ID_REQUIRED',
-          'any.required': 'CAMPAIGN_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        claim_links: Joi.array().items(Joi.object()).min(1).required().messages({
-          'array.base': 'CLAIM_LINKS_WRONG_TYPE',
-          'array.includes': 'CLAIM_LINKS_INVALID_ITEMS',
-          'array.min': 'CLAIM_LINKS_EMPTY',
-          'any.required': 'CLAIM_LINKS_REQUIRED'
-        }),
-        batch_description: Joi.string().required().messages({
-          'string.base': 'BATCH_DESCRIPTION_WRONG_TYPE',
-          'string.empty': 'BATCH_DESCRIPTION_EMPTY',
-          'any.required': 'BATCH_DESCRIPTION_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
   if (celebrateSchema === 'getLinksBatchById') {
     return celebrate({
       [Segments.PARAMS]: Joi.object().keys({
@@ -346,18 +321,6 @@ const celebrateMiddleware = celebrateSchema => {
           'string.base': 'LINK_ID_WRONG_TYPE',
           'string.empty': 'LINK_ID_REQUIRED',
           'any.required': 'LINK_ID_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'checkQrId') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        qr_id: Joi.string().required().messages({
-          'string.base': 'QR_ID_WRONG_TYPE',
-          'string.empty': 'QR_ID_REQUIRED',
-          'any.required': 'QR_ID_REQUIRED'
         })
       })
     }, { abortEarly: false, mode: 'FULL' })
@@ -551,25 +514,30 @@ const celebrateMiddleware = celebrateSchema => {
         archived: Joi.boolean().optional().messages({
           'boolean.base': 'ARCHIVED_WRONG_TYPE',
           'any.required': 'ARCHIVED_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateDispenserStatus') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        active: Joi.boolean().required().messages({
+        }),
+        active: Joi.boolean().optional().messages({
           'boolean.base': 'ACTIVE_WRONG_TYPE',
-          'boolean.empty': 'ACTIVE_REQUIRED',
-          'any.required': 'ACTIVE_REQUIRED'
+          'boolean.empty': 'ACTIVE_REQUIRED'
+        }),
+        redirect_url: Joi.string().optional().messages({
+          'string.base': 'REDIRECT_URL_WRONG_TYPE',
+          'string.empty': 'REDIRECT_URL_REQUIRED'
+        }),
+        redirect_on: Joi.boolean().optional().messages({
+          'boolean.base': 'REDIRECT_ON_WRONG_TYPE',
+          'boolean.empty': 'REDIRECT_ON_REQUIRED'
+        }),
+        timeframe_on: Joi.boolean().optional().messages({
+          'boolean.base': 'TIMEFRAME_ON_WRONG_TYPE',
+          'boolean.empty': 'TIMEFRAME_ON_REQUIRED'
+        }),
+        whitelist_on: Joi.boolean().optional().messages({
+          'boolean.base': 'WHITELIST_ON_WRONG_TYPE',
+          'boolean.empty': 'WHITELIST_ON_REQUIRED'
+        }),
+        instagram_follow_id: Joi.string().optional().messages({
+          'string.base': 'INSTAGRAM_FOLLOW_ID_WRONG_TYPE',
+          'string.empty': 'INSTAGRAM_FOLLOW_ID_REQUIRED'
         })
       })
     }, { abortEarly: false, mode: 'FULL' })
@@ -651,50 +619,6 @@ const celebrateMiddleware = celebrateSchema => {
     }, { abortEarly: false, mode: 'FULL' })
   }
 
-  if (celebrateSchema === 'pop') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        multiscan_qr_id: Joi.string().required().messages({
-          'string.base': 'MULTISCAN_QR_ID_WRONG_TYPE',
-          'string.empty': 'MULTISCAN_QR_ID_REQUIRED',
-          'any.required': 'MULTISCAN_QR_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        scan_id: Joi.string().required().messages({
-          'string.base': 'SCAN_ID_WRONG_TYPE',
-          'string.empty': 'SCAN_ID_REQUIRED',
-          'any.required': 'SCAN_ID_REQUIRED'
-        }),
-        scan_id_sig: Joi.string().required().messages({
-          'string.base': 'SCAN_ID_SIG_WRONG_TYPE',
-          'string.empty': 'SCAN_ID_SIG_REQUIRED',
-          'any.required': 'SCAN_ID_SIG_REQUIRED'
-        }),
-        receiver: Joi.string().optional().messages({
-          'string.base': 'RECEIVER_WRONG_TYPE',
-          'string.empty': 'RECEIVER_REQUIRED',
-          'any.required': 'RECEIVER_REQUIRED'
-        }),
-        whitelist_sig: Joi.string().optional().messages({
-          'string.base': 'WHITELIST_SIG_WRONG_TYPE',
-          'string.empty': 'WHITELIST_SIG_REQUIRED',
-          'any.required': 'WHITELIST_SIG_REQUIRED'
-        }),
-        message: Joi.string().optional().messages({
-          'string.base': 'MESSAGE_WRONG_TYPE',
-          'string.empty': 'MESSAGE_REQUIRED',
-          'any.required': 'MESSAGE_REQUIRED'
-        }),
-        chain_id: Joi.number().optional().messages({
-          'number.base': 'CHAIN_ID_WRONG_TYPE',
-          'number.empty': 'CHAIN_ID_REQUIRED',
-          'any.required': 'CHAIN_ID_REQUIRED'
-        })
-      })
-    })
-  }
-
   if (celebrateSchema === 'popReclaimLink') {
     return celebrate({
       [Segments.PARAMS]: Joi.object().keys({
@@ -728,101 +652,6 @@ const celebrateMiddleware = celebrateSchema => {
           'string.base': 'DISPENSER_ID_WRONG_TYPE',
           'string.empty': 'DISPENSER_ID_REQUIRED',
           'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateRedirectUrl') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        redirect_url: Joi.string().required().messages({
-          'string.base': 'REDIRECT_URL_WRONG_TYPE',
-          'string.empty': 'REDIRECT_URL_REQUIRED',
-          'any.required': 'REDIRECT_URL_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateRedirectOn') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        redirect_on: Joi.boolean().required().messages({
-          'boolean.base': 'REDIRECT_ON_WRONG_TYPE',
-          'boolean.empty': 'REDIRECT_ON_REQUIRED',
-          'any.required': 'REDIRECT_ON_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateTimeframeOn') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        timeframe_on: Joi.boolean().required().messages({
-          'boolean.base': 'TIMEFRAME_ON_WRONG_TYPE',
-          'boolean.empty': 'TIMEFRAME_ON_REQUIRED',
-          'any.required': 'TIMEFRAME_ON_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateWhitelistOn') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        whitelist_on: Joi.boolean().required().messages({
-          'boolean.base': 'WHITELIST_ON_WRONG_TYPE',
-          'boolean.empty': 'WHITELIST_ON_REQUIRED',
-          'any.required': 'WHITELIST_ON_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
-  if (celebrateSchema === 'updateReclaimData') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        dispenser_id: Joi.string().required().messages({
-          'string.base': 'DISPENSER_ID_WRONG_TYPE',
-          'string.empty': 'DISPENSER_ID_REQUIRED',
-          'any.required': 'DISPENSER_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        instagram_follow_id: Joi.string().required().messages({
-          'string.base': 'INSTAGRAM_FOLLOW_ID_WRONG_TYPE',
-          'string.empty': 'INSTAGRAM_FOLLOW_ID_REQUIRED',
-          'any.required': 'INSTAGRAM_FOLLOW_ID_REQUIRED'
         })
       })
     }, { abortEarly: false, mode: 'FULL' })
