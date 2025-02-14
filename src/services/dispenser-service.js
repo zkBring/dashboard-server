@@ -23,7 +23,6 @@ class DispenserService {
     )
 
     const handles = await userService.getUserHandlesAndDispenserIds()
-
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
       if (whitelistDispenserIds.has(handleObj.dispenserId)) {
@@ -51,6 +50,7 @@ class DispenserService {
     claimDuration,
     multiscanQrId,
     creatorAddress,
+    instagramFollowId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
@@ -77,6 +77,7 @@ class DispenserService {
       params.reclaimAppSecret = stageConfig.RECLAIM_APP_SECRET
       params.reclaimProviderId = stageConfig.RECLAIM_PROVIDER_ID
       params.reclaimProviderType = stageConfig.RECLAIM_PROVIDER_TYPE
+      params.instagramFollowId = instagramFollowId
     }
 
     return await this._create(params)
@@ -98,6 +99,7 @@ class DispenserService {
     multiscanQrId,
     creatorAddress,
     reclaimAppSecret,
+    instagramFollowId,
     reclaimProviderId,
     reclaimProviderType,
     encryptedMultiscanQrSecret,
@@ -119,6 +121,7 @@ class DispenserService {
       multiscanQrId,
       creatorAddress,
       reclaimAppSecret,
+      instagramFollowId,
       reclaimProviderId,
       reclaimProviderType,
       encryptedMultiscanQrSecret,

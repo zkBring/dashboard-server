@@ -24,6 +24,7 @@ const createDispenser = async (req, res) => {
     timeframe_on: timeframeOn,
     claim_duration: claimDuration,
     multiscan_qr_id: multiscanQrId,
+    instagram_follow_id: instagramFollowId,
     encrypted_multiscan_qr_secret: encryptedMultiscanQrSecret,
     encrypted_multiscan_qr_enc_code: encryptedMultiscanQrEncCode
   } = req.body
@@ -47,6 +48,7 @@ const createDispenser = async (req, res) => {
     claimDuration,
     multiscanQrId,
     creatorAddress,
+    instagramFollowId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   })
