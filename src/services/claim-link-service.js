@@ -97,10 +97,6 @@ class ClaimLinkService {
       .populate('campaign')
   }
 
-  async updateActiveStatus (linkId, activateStatus) {
-    return await ClaimLink.findOneAndUpdate({ linkId }, { active: activateStatus }, { new: true })
-  }
-
   async fetchClaimLinkStatus (linkItem) {
     if (!linkItem.active) {
       return {

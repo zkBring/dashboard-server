@@ -162,29 +162,6 @@ const getDispenserById = async (req, res) => {
   })
 }
 
-const getCampaign = async (req, res) => {
-  const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
-  logger.json({ controller: 'dispenser-controller', method: 'getCampaignData', multiscan_qr_id: multiscanQrId })
-
-  if (!multiscanQrId) throw new BadRequestError('Multiscan qr id is not provided.', 'MULTISCAN_QR_ID_REQUIRED')
-
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
-
-  const campaign = await dispenserService.getCampaign(dispenser)
-  campaign.preview_setting = dispenser.previewSetting
-  campaign.whitelist_type = dispenser.whitelistType
-  campaign.whitelist_on = dispenser.whitelistOn
-  campaign.redirect_url = dispenser.redirectUrl
-  campaign.redirect_on = dispenser.redirectOn
-
-  res.json({
-    success: true,
-    campaign,
-    reclaim: dispenser.reclaim
-  })
-}
-
 const getCampaignDataForClaimer = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
   const { multiscanQREncCode } = req.query
@@ -470,7 +447,6 @@ const updateReclaimData = async (req, res) => {
 module.exports = {
   uploadLinks,
   updateLinks,
-  getCampaign,
   getDispensers,
   getLinksReport,
   popReclaimLink,

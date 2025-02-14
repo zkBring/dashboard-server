@@ -13,14 +13,6 @@ const routes = {
       celebrateSchema: 'updateCampaign'
     }
   },
-  '/dashboard/linkdrop/campaigns/:campaign_id/save-batch': {
-    post: {
-      controller: 'campaign-controller',
-      method: 'addLinksBatch',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
-      celebrateSchema: 'addLinksBatch'
-    }
-  },
   '/dashboard/linkdrop/campaigns/:campaign_id/batches': {
     get: {
       controller: 'campaign-controller',
@@ -66,22 +58,6 @@ const routes = {
       method: 'getCampaigns',
       authType: ['JWT',],
       celebrateSchema: 'getCampaigns'
-    }
-  },
-  '/dashboard/linkdrop/claim-links/:link_id/deactivate': {
-    post: {
-      controller: 'claim-link-controller',
-      method: 'deactivateClaimLink',
-      authType: ['CAMPAIGN_SIG',],
-      celebrateSchema: 'checkLinkId'
-    }
-  },
-  '/dashboard/linkdrop/claim-links/:link_id/reactivate': {
-    post: {
-      controller: 'claim-link-controller',
-      method: 'reactivateClaimLink',
-      authType: ['CAMPAIGN_SIG',],
-      celebrateSchema: 'checkLinkId'
     }
   },
   '/dashboard/dispensers': {
@@ -177,12 +153,6 @@ const routes = {
       controller: 'dispenser-controller',
       method: 'popReclaimLink',
       celebrateSchema: 'popReclaimLink'
-    }
-  },
-  '/dashboard/dispensers/multiscan-qrs/:multiscan_qr_id/campaign': {
-    get: {
-      controller: 'dispenser-controller',
-      method: 'getCampaign'
     }
   },
   '/claimer/dispensers/multiscan-qrs/:multiscan_qr_id/campaign': {

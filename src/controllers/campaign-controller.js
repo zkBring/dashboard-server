@@ -161,47 +161,6 @@ const getLinksReport = async (req, res) => {
   })
 }
 
-const addLinksBatch = async (req, res) => {
-  logger.json({ controller: 'campaign-controller', method: 'addLinksBatch', user_address: req.userAddress })
-  const campaignId = req.params.campaign_id
-  const {
-    claim_links: claimLinks,
-    batch_description: batchDescription
-  } = req.body
-
-  if (!ObjectId.isValid(campaignId)) {
-    throw new BadRequestError('Campaign ID is not valid', 'CAMPAIGN_ID_NOT_VALID')
-  }
-
-  const campaign = await campaignService.findOneById(campaignId)
-  if (!campaign) {
-    throw new NotFoundError('Campaign not found.', 'CAMPAIGN_NOT_FOUND')
-  }
-
-  if (campaign.creatorAddress.toLowerCase() !== req.userAddress) {
-    throw new ForbiddenError('User address doesn’t match campaign creator address', 'CREATOR_ADDRESS_NOT_VALID')
-  }
-
-  claimLinksArrayValidator(claimLinks)
-  const batchDB = await batchService.create(
-    campaignId,
-    batchDescription
-  )
-  const claimLinksDB = await claimLinkService.create(
-    claimLinks,
-    campaignId,
-    batchDB._id
-  )
-
-  res.json({
-    success: true,
-    campaign_id: campaignId,
-    creator_address: campaign.creatorAddress,
-    batch: batchDB,
-    claim_links: claimLinksDB
-  })
-}
-
 const getLinksBatches = async (req, res) => {
   logger.json({ controller: 'campaign-controller', method: 'getLinksBatch', user_address: req.userAddress })
   const campaignId = req.params.campaign_id
@@ -378,7 +337,6 @@ const updateCampaign = async (req, res) => {
 
 module.exports = {
   getCampaigns,
-  addLinksBatch,
   createCampaign,
   updateCampaign,
   getLinksReport,
