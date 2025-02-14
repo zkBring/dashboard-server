@@ -2,11 +2,8 @@ const User = require('../models/user-model')
 
 class UserService {
   async createUser ({ handle, dispenserId, reclaimProviderType }) {
-    const user = await User.findOne({ handle: handle.toLowerCase(), dispenserId })
-    if (user) return user
-
     return await User.create({
-      handle,
+      handle: handle.toLowerCase(),
       dispenserId,
       reclaimProviderType
     })
@@ -14,12 +11,12 @@ class UserService {
 
   async findOneByHandleAndDispenserId ({ handle, dispenserId }) {
     return await User.findOne({
-      handle: handle.toLowerCase(),
+      handle: handle.toLowerCase(), 
       dispenserId
     })
   }
 
-  async getUserHandlesAndDispenserIds () {
+  async getUserHandlesAndDispenserIds() {
     return await User.find({}, 'handle dispenserId')
   }
 }

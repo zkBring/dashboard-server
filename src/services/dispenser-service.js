@@ -16,26 +16,24 @@ class DispenserService {
     this.initializeHandlesCache()
   }
 
-  async initializeHandlesCache () {
-    const dispensers = await Dispenser.find({}, '_id whitelistOn')
-    const whitelistDispensers = new Set(
-      dispensers
-        .filter(dispenser => dispenser.whitelistOn)
-        .map(dispenser => dispenser._id.toString())
+  async initializeHandlesCache() {
+    const whitelistDispensers = await Dispenser.find({ whitelistOn: true }, '_id')
+    const whitelistDispenserIds = new Set(
+      whitelistDispensers.map(dispenser => dispenser._id.toString())
     )
 
     const handles = await userService.getUserHandlesAndDispenserIds()
+
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
-
-      if (whitelistDispensers.has(handleObj.dispenserId)) {
+      if (whitelistDispenserIds.has(handleObj.dispenserId)) {
         if (!this.whiteListHandlesCache[handleObj.dispenserId]) {
           this.whiteListHandlesCache[handleObj.dispenserId] = {}
         }
         this.whiteListHandlesCache[handleObj.dispenserId][handleObj.handle.toLowerCase()] = true
       }
     })
-
+  
     logger.info(`Successfully loaded handles into cache for ${Object.keys(this.whiteListHandlesCache).length} dispensers`)
   }
 
@@ -468,11 +466,18 @@ class DispenserService {
         })
       }
     } else {
-      await userService.createUser({
-        handle: userHandle,
-        dispenserId: dispenser._id.toString(),
-        reclaimProviderType: dispenser.reclaimProviderType
+      const userDb = await userService.findOneByHandleAndDispenserId({
+        handle: userHandle.toLowerCase(),
+        dispenserId: dispenser._id.toString()
       })
+
+      if (!userDb) {
+        await userService.createUser({ 
+          handle: userHandle.toLowerCase(),
+          dispenserId: dispenser._id.toString(),
+          reclaimProviderType: dispenser.reclaimProviderType
+        })
+      }
     }
 
     await reclaimVerificationService.updateReclaimVerification({
