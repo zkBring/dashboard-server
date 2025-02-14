@@ -74,11 +74,11 @@ app.use((error, req, res, next) => {
     const isSilenced = errorToWarn[error.cause]?.silence
 
     if (shouldWarn) {
-        logger.warn(error.message)
-        logger.warn(error.stack)
+      logger.warn(error.message)
+      logger.warn(error.stack)
     } else if (!isSilenced) {
-        logger.error(error.message)
-        logger.error(error.stack)
+      logger.error(error.message)
+      logger.error(error.stack)
     }
 
     res.status(error.statusCode).send({

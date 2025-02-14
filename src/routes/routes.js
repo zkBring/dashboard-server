@@ -9,7 +9,7 @@ const routes = {
     patch: {
       controller: 'campaign-controller',
       method: 'updateCampaign',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'updateCampaign'
     }
   },
@@ -41,14 +41,14 @@ const routes = {
     post: {
       controller: 'campaign-controller',
       method: 'createCampaign',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'createCampaign'
 
     },
     get: {
       controller: 'campaign-controller',
       method: 'getCampaigns',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'getCampaigns'
     }
   },
@@ -56,12 +56,12 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getDispensers',
-      authType: ['JWT',]
+      authType: ['JWT']
     },
     post: {
       controller: 'dispenser-controller',
       method: 'createDispenser',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'createDispenser'
     }
   },
@@ -69,12 +69,12 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getDispenserById',
-      authType: ['JWT',]
+      authType: ['JWT']
     },
     patch: {
       controller: 'dispenser-controller',
       method: 'updateDispenser',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'updateDispenser'
     }
   },
@@ -82,13 +82,13 @@ const routes = {
     post: {
       controller: 'dispenser-controller',
       method: 'uploadLinks',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'uploadLinks'
     },
     put: {
       controller: 'dispenser-controller',
       method: 'updateLinks',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'updateLinks'
     }
   },
@@ -96,7 +96,7 @@ const routes = {
     get: {
       controller: 'dispenser-controller',
       method: 'getLinksReport',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'getLinksReport'
     }
   },
@@ -129,12 +129,12 @@ const routes = {
     get: {
       controller: 'dashboard-key-controller',
       method: 'getEncryptedKey',
-      authType: ['JWT',]
+      authType: ['JWT']
     },
     post: {
       controller: 'dashboard-key-controller',
       method: 'addEncryptedKey',
-      authType: ['JWT',],
+      authType: ['JWT'],
       celebrateSchema: 'addEncryptedKey'
     }
   },

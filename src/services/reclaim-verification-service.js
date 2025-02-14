@@ -1,9 +1,9 @@
 const ReclaimVerification = require('../models/reclaim-verification-model')
 
-class reclaimVerificationService {
-  async createReclaimVerification({ reclaimSessionId }) {
+class ReclaimVerificationService {
+  async createReclaimVerification ({ reclaimSessionId }) {
     const existingReclaimVerification = await ReclaimVerification.findOne({ reclaimSessionId })
-    
+
     if (existingReclaimVerification) {
       existingReclaimVerification.status = 'pending'
       existingReclaimVerification.cause = ''
@@ -12,13 +12,13 @@ class reclaimVerificationService {
       return await existingReclaimVerification.save()
     }
 
-    return await ReclaimVerification.create({ 
+    return await ReclaimVerification.create({
       reclaimSessionId,
       status: 'pending'
     })
   }
 
-  async findOneByReclaimSessionId({ reclaimSessionId }) {
+  async findOneByReclaimSessionId ({ reclaimSessionId }) {
     return await ReclaimVerification.findOne({ reclaimSessionId })
   }
 
@@ -30,8 +30,8 @@ class reclaimVerificationService {
 
     return await reclaimVerification.save()
   }
-  
-  async updateReclaimVerification({
+
+  async updateReclaimVerification ({
     reclaimVerification,
     message,
     status,
@@ -40,9 +40,9 @@ class reclaimVerificationService {
     reclaimVerification.status = status
     reclaimVerification.message = message
     reclaimVerification.cause = cause
-    
+
     return await reclaimVerification.save()
   }
 }
 
-module.exports = new reclaimVerificationService()
+module.exports = new ReclaimVerificationService()

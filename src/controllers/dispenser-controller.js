@@ -179,9 +179,9 @@ const getCampaignDataForClaimer = async (req, res) => {
 }
 
 const receiveReclaimProofs = async (req, res) => {
-  let reclaimProof = req.body
-  const { 
-    multiscan_qr_id: multiscanQrId, 
+  const reclaimProof = req.body
+  const {
+    multiscan_qr_id: multiscanQrId,
     session_id: reclaimSessionId
   } = req.params
 
@@ -207,7 +207,7 @@ const popReclaimLink = async (req, res) => {
 
   logger.json({ controller: 'dispenser-controller', method: 'popReclaimLink', multiscanQrId, reclaimSessionId })
   logger.json({ multiscanQrId, reclaimSessionId })
-  
+
   const encryptedClaimLink = await dispenserService.popReclaimLink({ multiscanQrId, reclaimSessionId })
 
   res.json({

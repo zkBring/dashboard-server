@@ -62,9 +62,7 @@ class ClaimLinkService {
     if (!linkItem) return null
 
     return {
-      token_name: token?.name,
       link_key: linkItem.linkKey,
-      token_image: token?.thumbnail,
       symbol: linkItem.campaign?.symbol,
       wallet: linkItem.campaign?.wallet,
       chain_id: linkItem.campaign?.chainId,

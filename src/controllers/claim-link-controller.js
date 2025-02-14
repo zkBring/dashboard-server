@@ -1,6 +1,5 @@
 const logger = require('../utils/logger')
 const claimLinkService = require('../services/claim-link-service')
-const { NotFoundError, ForbiddenError } = require('../utils/errors')
 
 const getClaimLinkStatus = async (req, res) => {
   const linkId = req.params.link_id

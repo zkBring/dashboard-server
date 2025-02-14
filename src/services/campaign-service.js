@@ -3,7 +3,7 @@ const stageConfig = require('../../stage-config')
 const Campaign = require('../models/campaign-model')
 const claimApiService = require('./claim-api-service')
 const claimLinkService = require('./claim-link-service')
-const { NotFoundError, BadRequestError } = require('../utils/errors')
+const { NotFoundError } = require('../utils/errors')
 const config = require(`../../configs/${stageConfig.NODE_ENV}.config`)
 
 class CampaignService {
