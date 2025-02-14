@@ -1,5 +1,5 @@
 const routes = {
-  '/dashboard/linkdrop/campaigns/:campaign_id': {
+  '/dashboard/campaigns/:campaign_id': {
     get: {
       controller: 'campaign-controller',
       method: 'getCampaignById',
@@ -13,7 +13,7 @@ const routes = {
       celebrateSchema: 'updateCampaign'
     }
   },
-  '/dashboard/linkdrop/campaigns/:campaign_id/batches': {
+  '/dashboard/campaigns/:campaign_id/batches': {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatches',
@@ -21,7 +21,7 @@ const routes = {
       celebrateSchema: 'checkCampaignId'
     }
   },
-  '/dashboard/linkdrop/campaigns/:campaign_id/batches/:batch_id': {
+  '/dashboard/campaigns/:campaign_id/batches/:batch_id': {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatchById',
@@ -29,15 +29,7 @@ const routes = {
       celebrateSchema: 'getLinksBatchById'
     }
   },
-  '/dashboard/linkdrop/campaigns/:campaign_id/batches/:batch_id/add-links': {
-    post: {
-      controller: 'campaign-controller',
-      method: 'addLinksToBatch',
-      authType: ['JWT'],
-      celebrateSchema: 'addLinksToBatch'
-    }
-  },
-  '/dashboard/linkdrop/campaigns/:campaign_id/report': {
+  '/dashboard/campaigns/:campaign_id/report': {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksReport',
@@ -45,7 +37,7 @@ const routes = {
       celebrateSchema: 'checkCampaignId'
     }
   },
-  '/dashboard/linkdrop/campaigns': {
+  '/dashboard/campaigns': {
     post: {
       controller: 'campaign-controller',
       method: 'createCampaign',

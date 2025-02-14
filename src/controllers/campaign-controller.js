@@ -1,5 +1,4 @@
 const logger = require('../utils/logger')
-const stageConfig = require('../../stage-config')
 const ObjectId = require('mongoose').Types.ObjectId
 const batchService = require('../services/batch-service')
 const campaignService = require('../services/campaign-service')
@@ -229,57 +228,6 @@ const getLinksBatchById = async (req, res) => {
   })
 }
 
-const addLinksToBatch = async (req, res) => {
-  logger.json({ controller: 'campaign-controller', method: 'addLinksToBatch', user_address: req.userAddress })
-  const campaignId = req.params.campaign_id
-  const batchId = req.params.batch_id
-  const claimLinks = req.body.claim_links
-
-  if (!ObjectId.isValid(campaignId)) {
-    throw new BadRequestError('Campaign ID is not valid', 'CAMPAIGN_ID_NOT_VALID')
-  }
-
-  const campaign = await campaignService.findOneById(campaignId)
-  if (!campaign) {
-    throw new NotFoundError('Campaign not found.', 'CAMPAIGN_NOT_FOUND')
-  }
-
-  if (campaign.creatorAddress.toLowerCase() !== req.userAddress) {
-    throw new ForbiddenError('User address doesn’t match campaign creator address', 'CREATOR_ADDRESS_NOT_VALID')
-  }
-
-  if (!ObjectId.isValid(batchId)) {
-    throw new BadRequestError('Batch ID is not valid.', 'BATCH_ID_NOT_VALID')
-  }
-
-  const batch = await batchService.findOneById(batchId)
-  if (!batch) {
-    throw new NotFoundError('Batch not found.', 'BATCH_NOT_FOUND')
-  }
-
-  if (batch.campaign.toString() !== campaign._id.toString()) {
-    throw new ValidationError('Batch does not match campaign', 'BATCH_NOT_MATCH_CAMPAIGN')
-  }
-
-  claimLinksArrayValidator(claimLinks)
-  const batchLinksCount = await claimLinkService.countLinksByBatchId(batchId)
-  const tooManyLinks = (claimLinks.length + batchLinksCount) >= +stageConfig.LINKS_BATCH_LIMIT
-  if (tooManyLinks) {
-    throw new ValidationError('Limit of links amount for one batch is reached.', 'LIMIT_OF_LINKS_FOR_BATCH_IS_REACHED')
-  }
-
-  const claimLinksDB = await claimLinkService.create(
-    claimLinks,
-    campaignId,
-    batchId
-  )
-
-  res.json({
-    success: true,
-    claim_links: claimLinksDB
-  })
-}
-
 const updateCampaign = async (req, res) => {
   logger.json({ controller: 'campaign-controller', method: 'updateCampaign', user_address: req.userAddress })
   const campaignId = req.params.campaign_id
@@ -340,7 +288,6 @@ module.exports = {
   createCampaign,
   updateCampaign,
   getLinksReport,
-  addLinksToBatch,
   getCampaignById,
   getLinksBatches,
   getLinksBatchById

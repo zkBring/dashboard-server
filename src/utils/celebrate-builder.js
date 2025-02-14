@@ -265,31 +265,6 @@ const celebrateMiddleware = celebrateSchema => {
     }, { abortEarly: false, mode: 'FULL' })
   }
 
-  if (celebrateSchema === 'addLinksToBatch') {
-    return celebrate({
-      [Segments.PARAMS]: Joi.object().keys({
-        campaign_id: Joi.string().required().messages({
-          'string.base': 'CAMPAIGN_ID_WRONG_TYPE',
-          'string.empty': 'CAMPAIGN_ID_REQUIRED',
-          'any.required': 'CAMPAIGN_ID_REQUIRED'
-        }),
-        batch_id: Joi.string().required().messages({
-          'string.base': 'BATCH_ID_WRONG_TYPE',
-          'string.empty': 'BATCH_ID_REQUIRED',
-          'any.required': 'BATCH_ID_REQUIRED'
-        })
-      }),
-      [Segments.BODY]: Joi.object().keys({
-        claim_links: Joi.array().items(Joi.object()).min(1).required().messages({
-          'array.base': 'CLAIM_LINKS_WRONG_TYPE',
-          'array.includes': 'CLAIM_LINKS_INVALID_ITEMS',
-          'array.min': 'CLAIM_LINKS_EMPTY',
-          'any.required': 'CLAIM_LINKS_REQUIRED'
-        })
-      })
-    }, { abortEarly: false, mode: 'FULL' })
-  }
-
   if (celebrateSchema === 'claim') {
     return celebrate({
       [Segments.PARAMS]: Joi.object().keys({
