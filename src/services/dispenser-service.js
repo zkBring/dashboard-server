@@ -1,11 +1,8 @@
-const ethers = require('ethers')
 const logger = require('../utils/logger')
 const userService = require('./user-service')
-const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
 const claimApiService = require('./claim-api-service')
-const whitelistService = require('./whitelist-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
 const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
@@ -26,7 +23,6 @@ class DispenserService {
     )
 
     const handles = await userService.getUserHandlesAndDispenserIds()
-    
     handles.forEach((handleObj) => {
       handleObj = handleObj.toObject()
       if (whitelistDispenserIds.has(handleObj.dispenserId)) {
@@ -58,7 +54,6 @@ class DispenserService {
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
-
     const params = {
       title,
       dynamic,
@@ -87,7 +82,7 @@ class DispenserService {
 
     return await this._create(params)
   }
-  
+
   async _create ({
     title,
     dynamic,
@@ -175,7 +170,7 @@ class DispenserService {
     return jsonedDispenser
   }
 
-  async getDispensers(creatorAddress) {
+  async getDispensers (creatorAddress) {
     let dispensers = await this.findByCreatorAddress(creatorAddress)
     dispensers = await Promise.all(dispensers.map(async (dispenser) => {
       const dispenserWithCounts = await this.findOneWithCountLinksAndCountClaims(dispenser._id)
@@ -189,11 +184,6 @@ class DispenserService {
     const dispenser = await this.findOneById(dispenserId)
     if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
     const jsonedDispenser = dispenser.toJSON()
-
-    if (jsonedDispenser.whitelist_type) {
-      const whitelistCount = await whitelistService.countItemsByDispenserId(dispenserId)
-      jsonedDispenser.whitelist_count = whitelistCount
-    }
 
     const linksCount = await dispenserLinkService.countLinksByDispenserId(dispenserId)
     if (linksCount === 0) {
@@ -254,27 +244,15 @@ class DispenserService {
     const tokenId = populatedLink.claimParams?.tokenId
     const tokenAmount = populatedLink.claimParams?.tokenAmount
     const campaign = populatedLink?.campaign
-    let isLinkdropToken = false
-    let token
-    if (campaign?.collectionId !== null) {
-      token = await tokenService.findOneByTokenAndCollectionId({
-        tokenId,
-        tokenCollection: campaign?.collectionId
-      })
-      isLinkdropToken = true
-    }
 
     return {
       token_id: tokenId,
       title: campaign.title,
-      token_name: token?.name,
       wallet: campaign.wallet,
       campaign_id: campaign._id,
       token_amount: tokenAmount,
       chain_id: campaign.chainId,
-      token_image: token?.thumbnail,
       sponsored: campaign.sponsored,
-      linkdrop_token: isLinkdropToken,
       token_address: campaign.tokenAddress,
       redirect_on: dispenserObj.redirectOn,
       redirect_url: dispenserObj.redirectUrl,
@@ -314,7 +292,6 @@ class DispenserService {
     redirectUrl,
     timeframeOn,
     reclaimAppId,
-    whitelistType,
     claimDuration,
     reclaimAppSecret,
     reclaimProviderId,
@@ -337,7 +314,6 @@ class DispenserService {
           redirectUrl,
           reclaimAppId,
           claimDuration,
-          whitelistType,
           reclaimAppSecret,
           reclaimProviderId,
           instagramFollowId
@@ -360,59 +336,29 @@ class DispenserService {
     }
   }
 
-  verifyScanIdSignature (scanId, scanIdSig, multiscanQrId) {
-    const message = `${stageConfig.SCAN_ID_SIG_MESSAGE} ${scanId}`
-    const decodedAddress = ethers.utils.verifyMessage(message, scanIdSig)
-    if (decodedAddress.toLowerCase() !== multiscanQrId.toLowerCase()) {
-      throw new ForbiddenError('Scan id signature is not verified.', 'SCAN_ID_NOT_VERIFIED')
-    }
-    return true
-  }
-
-  async addWhitelist ({
-    whitelist,
-    dispenserId,
-    whitelistOn,
-    whitelistType
-  }) {
-    const foundWhitelistItem = await whitelistService.findOneByDispenserId(dispenserId)
-    if (foundWhitelistItem) {
-      await whitelistService.deleteItemsByDispenserId(dispenserId)
-    }
-
-    const whitelistDB = await whitelistService.create({ dispenserId, whitelist, whitelistType })
-    const updatedDispenser = await this.updateDispenser({ dispenserId, whitelistType, whitelistOn })
-    updatedDispenser.whitelist_count = whitelistDB.length
-
-    return {
-      dispenser: updatedDispenser,
-      whitelist: whitelistDB
-    }
-  }
-
   async getCampaignDataForClaimer ({ multiscanQrId, multiscanQREncCode, SERVER_URL, APP_URL }) {
     const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
     if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
-  
+
     let reclaimVerificationURL = null
-  
+
     if (dispenser.reclaim) {
       const reclaimProofRequest = await ReclaimProofRequest.init(dispenser.reclaimAppId, dispenser.reclaimAppSecret, dispenser.reclaimProviderId)
-  
+
       logger.json({ SERVER_URL, APP_URL })
       const jsonProofResponse = false
       reclaimProofRequest.setAppCallbackUrl(`${stageConfig.ZUPLO_API_SERVER_URL}/api/v2/dashboard/dispensers/multiscan-qrs/${multiscanQrId}/campaign/${reclaimProofRequest.sessionId}/receive-reclaim-proofs`, jsonProofResponse)
-  
+
       const redirectUrl = `${stageConfig.VERIFICATION_APP_URL}/#/reclaim/${multiscanQrId}/${reclaimProofRequest.sessionId}/${multiscanQREncCode}/verification-complete`
       reclaimProofRequest.setRedirectUrl(redirectUrl)
-  
+
       // Generate the verification request URL
       reclaimVerificationURL = await reclaimProofRequest.getRequestUrl()
-  
+
       const reclaimRequestJson = reclaimProofRequest.toJsonString()
       logger.json({ reclaimRequestJson, sessionId: reclaimProofRequest.sessionId })
     }
-  
+
     const campaign = await this.getCampaign(dispenser)
     campaign.preview_setting = dispenser.previewSetting
     campaign.whitelist_type = dispenser.whitelistType
@@ -420,7 +366,7 @@ class DispenserService {
     campaign.redirect_url = dispenser.redirectUrl
     campaign.redirect_on = dispenser.redirectOn
     campaign.provider_type = dispenser.reclaimProviderType
-    
+
     return {
       campaign,
       reclaimVerificationURL,
@@ -433,16 +379,16 @@ class DispenserService {
     reclaimSessionId
   }) {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
-    
+
     const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
-    logger.json({reclaimVerification})
+    logger.json({ reclaimVerification })
     if (!reclaimVerification) throw new ForbiddenError('Reclaim verification not exists.', 'RECLAIM_VERIFICATION_NOT_EXISTS')
     if (reclaimVerification.status !== 'success') throw new ForbiddenError('Reclaim verification not success.', 'RECLAIM_VERIFICATION_NOT_SUCCESS')
     if (!reclaimVerification.handle) throw new ForbiddenError('No handle in reclaim verification', 'NO_HADLE_IN_RECLAIM_VERIFICATION')
-    
-    const userDb = await userService.findOneByHandleAndDispenserId({ 
-        handle: reclaimVerification.handle.toLowerCase(), 
-        dispenserId: dispenser._id.toString()
+
+    const userDb = await userService.findOneByHandleAndDispenserId({
+      handle: reclaimVerification.handle.toLowerCase(),
+      dispenserId: dispenser._id.toString()
     })
     if (!userDb) throw new ForbiddenError('User not exists', 'USER_NOT_EXISTS')
 
@@ -457,7 +403,7 @@ class DispenserService {
     userDb.alreadyClaimed = true
     userDb.linkId = dispenserLink.linkId
     await userDb.save()
-    
+
     return dispenserLink.encryptedClaimLink
   }
 
@@ -480,9 +426,9 @@ class DispenserService {
   }) {
     if (!dispenser.reclaim) throw new ForbiddenError('Reclaim action for non-reclaim dispenser.', 'RECLAIM_ACTION_FOR_NON_RECLAIM_DISPENSER')
     const reclaimVerification = await reclaimVerificationService.createReclaimVerification({ reclaimSessionId })
-    
+
     reclaimProof = JSON.parse(Object.keys(reclaimProof)[0])
-    
+
     const isVerifiedProof = await verifyProof(reclaimProof)
     if (!isVerifiedProof) {
       return await reclaimVerificationService.updateReclaimVerification({
@@ -494,7 +440,7 @@ class DispenserService {
     }
 
     const userHandle = this.getHandleByReclaimProviderType({ dispenser, reclaimProof })
-    logger.json({ userHandle: userHandle, providerType: dispenser.reclaimProviderType })
+    logger.json({ userHandle, providerType: dispenser.reclaimProviderType })
 
     if (!userHandle) {
       return await reclaimVerificationService.updateReclaimVerification({
@@ -512,8 +458,8 @@ class DispenserService {
 
     if (dispenser.whitelistOn) {
       const isHandleWhitelisted = this.whiteListHandlesCache[dispenser._id.toString()]?.[userHandle?.toLowerCase()]
-      logger.json({isHandleWhitelisted})
-      
+      logger.json({ isHandleWhitelisted })
+
       if (!isHandleWhitelisted) {
         return await reclaimVerificationService.updateReclaimVerification({
           reclaimVerification,
@@ -545,53 +491,23 @@ class DispenserService {
     })
   }
 
-  async popReclaimLink({ multiscanQrId, reclaimSessionId }) {
+  async popReclaimLink ({ multiscanQrId, reclaimSessionId }) {
     const dispenser = await this.findOneByMultiscanQrId(multiscanQrId)
     if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-    
+
     const reclaimVerification = await reclaimVerificationService.findOneByReclaimSessionId({ reclaimSessionId })
     if (!reclaimVerification) throw new NotFoundError('Reclaim verification not exists.', 'REACLAIM_VERIFICATION_NOT_EXISTS')
 
     if (reclaimVerification.status !== 'success') {
       const message = reclaimVerification.message || 'Reclaim verification is pending.'
-      const cause = reclaimVerification.cause || 'RECLAIM_VERIFICATION_PENDING' 
+      const cause = reclaimVerification.cause || 'RECLAIM_VERIFICATION_PENDING'
       throw new ForbiddenError(message, cause)
     }
-    
+
     return await this.getLinkByReclaimSessionId({
       dispenser,
       reclaimSessionId
     })
-  }
-
-  async pop ({
-    scanId,
-    receiver,
-    socketId,
-    dispenser
-  }) {
-    if (dispenser.reclaim) throw new ForbiddenError('Non-Reclaim action for reclaim dispenser.', 'NON_RECLAIM_ACTION_FOR_RECLAIM_DISPENSER')
-
-    // check if dispenser has been scanned before by this device
-    let previousLink = await dispenserLinkService.findOneByDispenserIdAndScanId(dispenser._id, scanId)
-    if (previousLink) return previousLink.encryptedClaimLink
-
-    // check if dispenser is whitelisted
-    if (dispenser.whitelistOn) {
-      if (dispenser.whitelistType === 'address') {
-        previousLink = await dispenserLinkService.findOneByDispenserIdAndReceiver(dispenser._id, receiver)
-        if (previousLink) return previousLink.encryptedClaimLink
-      }
-    }
-
-    const dispenserLink = await this._popDispenserLink({ dispenser })
-
-    dispenserLink.scanId = scanId
-    if (receiver) dispenserLink.receiver = receiver.toLowerCase()
-    await dispenserLink.save()
-
-    if (dispenser.dynamic) this._triggerSuccesfullScanEvent({ socketId })
-    return dispenserLink.encryptedClaimLink
   }
 
   async _popDispenserLink ({ dispenser }) {
@@ -616,22 +532,6 @@ class DispenserService {
     dispenser.popped = popped
     dispenser.save()
     return dispenserLink
-  }
-
-  async _triggerSuccesfullScanEvent ({ socketId }) {
-    const config = {
-      headers: { 'api-secret-key': `${stageConfig.SOCKET_SERVER_API_KEY}` }
-    }
-
-    try {
-      fetch(`${stageConfig.SOCKET_SERVER_URL}/scan?socket_id=${socketId}`, {
-        method: 'GET',
-        headers: config.headers
-      })
-    } catch (err) {
-      const errorMessage = err.message || err.reason || 'Unknown error'
-      logger.error(`Something went wrong while triggering socket server. Error: ${errorMessage}`)
-    }
   }
 
   getQrCampaignType (dispenser) {

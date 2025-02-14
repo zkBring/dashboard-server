@@ -19,7 +19,6 @@ class UserService {
   async getUserHandlesAndDispenserIds() {
     return await User.find({}, 'handle dispenserId')
   }
-
 }
 
 module.exports = new UserService()

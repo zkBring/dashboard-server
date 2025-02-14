@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const ReclaimVerificationSchema = new mongoose.Schema({
-reclaimSessionId: {
+  reclaimSessionId: {
     type: String,
     required: true
   },
@@ -20,7 +20,7 @@ reclaimSessionId: {
   message: {
     type: String,
     default: ''
-  },  
+  },
   handle: {
     type: String
   }

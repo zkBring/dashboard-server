@@ -1,5 +1,4 @@
 const logger = require('../utils/logger')
-const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const ClaimLink = require('../models/claim-link-model')
 const config = require(`../../configs/${stageConfig.NODE_ENV}.config`)
@@ -59,24 +58,11 @@ class ClaimLinkService {
   }
 
   async getLinkWithClaimParams (linkId) {
-    let token
-    let isLinkdropToken = false
     const linkItem = await this.findOneByLinkIdAndPopulateCampaign(linkId)
     if (!linkItem) return null
 
-    if (linkItem.campaign?.collectionId !== null) {
-      token = await tokenService.findOneByTokenAndCollectionId({
-        tokenId: linkItem.claimParams?.tokenId,
-        tokenCollection: linkItem.campaign?.collectionId
-      })
-      isLinkdropToken = true
-    }
-
     return {
-      token_name: token?.name,
       link_key: linkItem.linkKey,
-      token_image: token?.thumbnail,
-      linkdrop_token: isLinkdropToken,
       symbol: linkItem.campaign?.symbol,
       wallet: linkItem.campaign?.wallet,
       chain_id: linkItem.campaign?.chainId,
@@ -107,10 +93,6 @@ class ClaimLinkService {
   async findOneByLinkIdAndPopulateCampaign (linkId) {
     return await ClaimLink.findOne({ linkId })
       .populate('campaign')
-  }
-
-  async updateActiveStatus (linkId, activateStatus) {
-    return await ClaimLink.findOneAndUpdate({ linkId }, { active: activateStatus }, { new: true })
   }
 
   async fetchClaimLinkStatus (linkItem) {

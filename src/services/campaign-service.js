@@ -1,11 +1,9 @@
 const logger = require('../utils/logger')
-const tokenService = require('./token-service')
 const stageConfig = require('../../stage-config')
 const Campaign = require('../models/campaign-model')
 const claimApiService = require('./claim-api-service')
 const claimLinkService = require('./claim-link-service')
-const collectionSerice = require('./token-collection-service')
-const { NotFoundError, BadRequestError } = require('../utils/errors')
+const { NotFoundError } = require('../utils/errors')
 const config = require(`../../configs/${stageConfig.NODE_ENV}.config`)
 
 class CampaignService {
@@ -15,9 +13,7 @@ class CampaignService {
     wallet,
     chainId,
     sponsored,
-    claimLinks,
     claimHostOn,
-    collectionId,
     claimPattern,
     tokenAddress,
     signerAddress,
@@ -26,7 +22,6 @@ class CampaignService {
     campaignNumber,
     creatorAddress,
     multipleClaimsOn,
-    collectionTokenId,
     preferredWalletOn,
     availableCountries,
     encryptedSignerKey,
@@ -68,10 +63,6 @@ class CampaignService {
       claimingFinishedDescription,
       claimingFinishedButtonTitle,
       factoryAddress: config.factoryAddresses[chainId].toLowerCase()
-    }
-
-    if (tokenStandard === 'ERC1155' && collectionId && collectionTokenId) {
-      return await this._createERC1155Campaign({ ...params, claimLinks, collectionId, collectionTokenId })
     }
 
     return await this._create(params)
@@ -144,22 +135,6 @@ class CampaignService {
     return campaignDB
   }
 
-  async _createERC1155Campaign (params) {
-    const collection = await collectionSerice.findOneById(params.collectionId)
-    if (params.tokenAddress?.toLowerCase() !== collection?.tokenAddress?.toLowerCase()) {
-      throw new BadRequestError('Campaign token address does not match collection token address', 'TOKEN_ADDRESS_NOT_VALID')
-    }
-
-    const campaign = await this._create({ ...params })
-    await tokenService.bindCampaignIdToToken({
-      campaignId: campaign._id,
-      tokenId: params.collectionTokenId,
-      collectionId: params.collectionId
-    })
-
-    return campaign
-  }
-
   async findByCreatorAddress (creatorAddress) {
     return await Campaign.find({ creatorAddress }).sort({ createdAt: -1 })
   }
@@ -224,11 +199,7 @@ class CampaignService {
   }
 
   async getCampaignData (campaignId) {
-    const campaign = await this.findOneWithCountLinksAndCountClaims(campaignId)
-    const token = await tokenService.findOneByCampaignId(campaignId) || null
-
-    campaign.token_id = token?.tokenId
-    return campaign
+    return await this.findOneWithCountLinksAndCountClaims(campaignId)
   }
 
   async getLinksReportByCampaignId (campaignId) {
