@@ -3,7 +3,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getCampaignById',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
+      authType: ['JWT'],
       celebrateSchema: 'checkCampaignId'
     },
     patch: {
@@ -17,7 +17,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatches',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
+      authType: ['JWT'],
       celebrateSchema: 'checkCampaignId'
     }
   },
@@ -25,7 +25,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksBatchById',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
+      authType: ['JWT'],
       celebrateSchema: 'getLinksBatchById'
     }
   },
@@ -33,7 +33,7 @@ const routes = {
     post: {
       controller: 'campaign-controller',
       method: 'addLinksToBatch',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
+      authType: ['JWT'],
       celebrateSchema: 'addLinksToBatch'
     }
   },
@@ -41,7 +41,7 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getLinksReport',
-      authType: ['JWT', 'CAMPAIGN_SIG'],
+      authType: ['JWT'],
       celebrateSchema: 'checkCampaignId'
     }
   },

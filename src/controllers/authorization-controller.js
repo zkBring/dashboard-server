@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken')
-const logger = require('../utils/logger')
 const stageConfig = require('../../stage-config')
 const { ForbiddenError } = require('../utils/errors')
-const loginService = require('../services/login-service')
 
 const requestValidator = (req, res, next) => {
   if (stageConfig.REQUEST_VALIDATION !== 'true') return next()
@@ -37,27 +35,12 @@ const authorizationJWT = (req, res, next) => {
   }
 }
 
-const authorizationCampaignKey = async (req, res, next) => {
-  const campaignKey = req.get('x-campaign-key')
-  const verifiedUserAddress = await loginService.verifyCampaignKey(campaignKey)
-
-  if (verifiedUserAddress) {
-    req.userAddress = verifiedUserAddress
-    return next()
-  }
-
-  throw new ForbiddenError('x-campaign-key was not verified', 'X_CAMPAIGN_KEY_NOT_VERIFIED')
-}
-
 const buildAuthorization = (authType) => {
   const authorization = (req, res, next) => {
     if (authType.includes('JWT') && req.cookies.access_token) {
       return authorizationJWT(req, res, next)
     }
-    if (authType.includes('CAMPAIGN_SIG') && req.get('x-campaign-key')) {
-      return authorizationCampaignKey(req, res, next)
-    }
-    throw new ForbiddenError('Token or x-campaign-key or customer is not provided', 'TOKEN_OR_X_CAMPAIGN_KEY_NOT_PROVIDED')
+    throw new ForbiddenError('Token is not provided', 'TOKEN_NOT_PROVIDED')
   }
   return authorization
 }
