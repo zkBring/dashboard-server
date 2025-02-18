@@ -47,9 +47,9 @@ const routes = {
     },
     get: {
       controller: 'campaign-controller',
-      method: 'getCampaigns',
+      method: 'getUserCampaigns',
       authType: ['JWT'],
-      celebrateSchema: 'getCampaigns'
+      celebrateSchema: 'getUserCampaigns'
     }
   },
   '/dashboard/dispensers': {

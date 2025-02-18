@@ -146,7 +146,7 @@ const celebrateMiddleware = celebrateSchema => {
     }, { abortEarly: false, mode: 'FULL' })
   }
 
-  if (celebrateSchema === 'getCampaigns') {
+  if (celebrateSchema === 'getUserCampaigns') {
     return celebrate({
       [Segments.QUERY]: Joi.object().keys({
         chain_id: Joi.string().required().messages({

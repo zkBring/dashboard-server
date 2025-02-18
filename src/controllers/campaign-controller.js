@@ -110,7 +110,7 @@ const createCampaign = async (req, res) => {
   })
 }
 
-const getCampaigns = async (req, res) => {
+const getUserCampaigns = async (req, res) => {
   logger.json({ controller: 'campaign-controller', method: 'getCampaigns', user_address: req.userAddress })
   const creatorAddress = req.userAddress
   const chainId = req.query.chain_id
@@ -283,12 +283,15 @@ const updateCampaign = async (req, res) => {
   })
 }
 
+const getAllCampaigns = async (req, res) => {}
+
 module.exports = {
-  getCampaigns,
+  getUserCampaigns,
   createCampaign,
   updateCampaign,
   getLinksReport,
   getCampaignById,
   getLinksBatches,
+  getAllCampaigns,
   getLinksBatchById
 }
