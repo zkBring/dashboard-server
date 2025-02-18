@@ -150,6 +150,10 @@ class CampaignService {
     return await Campaign.findOne({ _id: campaignId })
   }
 
+  async getAllCampaigns () {
+    return await Campaign.find({}).sort({ createdAt: -1 })
+  }
+
   async findCampaignsAndCountLinks (creatorAddress, chainId) {
     const campaigns = await this.findByCreatorAddressAndChainId(creatorAddress, chainId)
     if (!campaigns.length) return campaigns

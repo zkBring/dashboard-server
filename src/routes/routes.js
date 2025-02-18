@@ -52,6 +52,12 @@ const routes = {
       celebrateSchema: 'getUserCampaigns'
     }
   },
+  '/dashboard/all-campaigns': {
+    get: {
+      controller: 'campaign-controller',
+      method: 'getAllCampaigns'
+    }
+  },
   '/dashboard/dispensers': {
     get: {
       controller: 'dispenser-controller',

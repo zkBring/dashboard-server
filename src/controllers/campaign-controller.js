@@ -283,15 +283,23 @@ const updateCampaign = async (req, res) => {
   })
 }
 
-const getAllCampaigns = async (req, res) => {}
+const getAllCampaigns = async (req, res) => {
+  logger.json({ controller: 'campaign-controller', method: 'getAllCampaigns' })
+
+  const campaigns = await campaignService.getAllCampaigns()
+  res.json({
+    success: true,
+    campaigns_array: campaigns
+  })
+}
 
 module.exports = {
-  getUserCampaigns,
   createCampaign,
   updateCampaign,
   getLinksReport,
   getCampaignById,
   getLinksBatches,
   getAllCampaigns,
+  getUserCampaigns,
   getLinksBatchById
 }
