@@ -1,6 +1,5 @@
 const logger = require('../utils/logger')
 const stageConfig = require('../../stage-config')
-const config = require(`../../configs/${stageConfig.NODE_ENV}.config`)
 const { NotFoundError, ServiceUnavailableError } = require('../utils/errors')
 
 class ClaimApiService {

@@ -1,7 +1,5 @@
-const loginService = require('../services/login-service')
 const batchService = require('../services/batch-service')
 const dispenserService = require('../services/dispenser-service')
-const whitelistService = require('../services/whitelist-service')
 const claimLinkService = require('../services/claim-link-service')
 const dispenserLinkService = require('../services/dispenser-link-service')
 const {
@@ -68,12 +66,19 @@ const updateDispenser = async (req, res) => {
   const userAddress = req.userAddress.toLowerCase()
   const dispenserId = req.params.dispenser_id
   const {
+    title,
+    active,
     archived,
     app_title: appTitle,
     claim_start: claimStart,
+    redirect_on: redirectOn,
     app_title_on: appTitleOn,
+    whitelist_on: whitelistOn,
     claim_finish: claimFinish,
-    claim_duration: claimDuration
+    redirect_url: redirectUrl,
+    timeframe_on: timeframeOn,
+    claim_duration: claimDuration,
+    instagram_follow_id: instagramFollowId
   } = req.body
   logger.json({ controller: 'dispenser-controller', method: 'updateDispenser', dispenser_id: dispenserId })
 
@@ -89,36 +94,22 @@ const updateDispenser = async (req, res) => {
   }
 
   const updatedDispenser = await dispenserService.updateDispenser({
+    title,
+    active,
     archived,
     appTitle,
+    redirectOn,
     appTitleOn,
     claimStart,
+    whitelistOn,
+    redirectUrl,
     claimFinish,
     dispenserId,
-    claimDuration
+    timeframeOn,
+    claimDuration,
+    instagramFollowId
   })
 
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
-const updateDispenserStatus = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { active } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateDispenserStatus', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({ active, dispenserId })
   res.json({
     success: true,
     dispenser: updatedDispenser
@@ -166,29 +157,6 @@ const getDispenserById = async (req, res) => {
   })
 }
 
-const getCampaign = async (req, res) => {
-  const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
-  logger.json({ controller: 'dispenser-controller', method: 'getCampaignData', multiscan_qr_id: multiscanQrId })
-
-  if (!multiscanQrId) throw new BadRequestError('Multiscan qr id is not provided.', 'MULTISCAN_QR_ID_REQUIRED')
-
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) throw new NotFoundError('Dispenser not found', 'DISPENSER_NOT_FOUND')
-
-  const campaign = await dispenserService.getCampaign(dispenser)
-  campaign.preview_setting = dispenser.previewSetting
-  campaign.whitelist_type = dispenser.whitelistType
-  campaign.whitelist_on = dispenser.whitelistOn
-  campaign.redirect_url = dispenser.redirectUrl
-  campaign.redirect_on = dispenser.redirectOn
-
-  res.json({
-    success: true,
-    campaign,
-    reclaim: dispenser.reclaim
-  })
-}
-
 const getCampaignDataForClaimer = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
   const { multiscanQREncCode } = req.query
@@ -213,9 +181,9 @@ const getCampaignDataForClaimer = async (req, res) => {
 }
 
 const receiveReclaimProofs = async (req, res) => {
-  let reclaimProof = req.body
-  const { 
-    multiscan_qr_id: multiscanQrId, 
+  const reclaimProof = req.body
+  const {
+    multiscan_qr_id: multiscanQrId,
     session_id: reclaimSessionId
   } = req.params
 
@@ -241,7 +209,7 @@ const popReclaimLink = async (req, res) => {
 
   logger.json({ controller: 'dispenser-controller', method: 'popReclaimLink', multiscanQrId, reclaimSessionId })
   logger.json({ multiscanQrId, reclaimSessionId })
-  
+
   const encryptedClaimLink = await dispenserService.popReclaimLink({ multiscanQrId, reclaimSessionId })
 
   res.json({
@@ -347,200 +315,6 @@ const updateLinks = async (req, res) => {
   res.json({ success: true })
 }
 
-const updateRedirectUrl = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { redirect_url: redirectUrl } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateRedirectUrl', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({ redirectUrl, dispenserId })
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
-const updateRedirectOn = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { redirect_on: redirectOn } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateRedirectOn', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({ redirectOn, dispenserId })
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
-const getWhitelist = async (req, res) => {
-  const dispenserId = req.params.dispenser_id
-  const userAddress = req.userAddress.toLowerCase()
-  logger.json({ controller: 'dispenser-controller', method: 'getWhitelist', dispenser_id: dispenserId })
-
-  if (!dispenserId) {
-    throw new BadRequestError('Dispenser id is not provided.', 'DISPENSER_ID_REQUIRED')
-  }
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const whitelist = await whitelistService.getWhitelist(dispenser)
-
-  res.json({
-    success: true,
-    whitelist_type: dispenser.whitelistType,
-    whitelist
-  })
-}
-
-const addWhitelist = async (req, res) => {
-  const dispenserId = req.params.dispenser_id
-  const userAddress = req.userAddress.toLowerCase()
-  const {
-    whitelist,
-    whitelist_on: whitelistOn,
-    whitelist_type: whitelistType
-  } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'addWhitelist', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.addWhitelist({
-    whitelist,
-    dispenserId,
-    whitelistOn,
-    whitelistType
-  })
-
-  res.json({
-    success: true,
-    dispenser: updatedDispenser.dispenser,
-    whitelist: updatedDispenser.whitelist
-  })
-}
-
-const updateWhitelistOn = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { whitelist_on: whitelistOn } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateWhitelistOn', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({ whitelistOn, dispenserId })
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
-const updateTimeframeOn = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { timeframe_on: timeframeOn } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateTimeframeOn', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({ timeframeOn, dispenserId })
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
-const pop = async (req, res) => {
-  const socketId = req.query.socket_id
-  const multiscanQrId = req.params.multiscan_qr_id.toLowerCase()
-
-  const {
-    message,
-    receiver,
-    chain_id: chainId,
-    scan_id: scanId,
-    scan_id_sig: scanIdSig,
-    whitelist_sig: whitelistSig
-  } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'pop', multiscan_qr_id: multiscanQrId, scan_id: scanId })
-
-  dispenserService.verifyScanIdSignature(scanId, scanIdSig, multiscanQrId)
-  const dispenser = await dispenserService.findOneByMultiscanQrId(multiscanQrId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-
-  if (dispenser.whitelistOn) {
-    if (dispenser.whitelistType === 'address') {
-      if (!whitelistSig) {
-        throw new BadRequestError('Whitelist sig is not provided.', 'WHITELIST_SIG_NOT_PROVIDED')
-      }
-      if (!chainId) {
-        throw new BadRequestError('Chain id is not provided.', 'CHAIN_ID_NOT_PROVIDED')
-      }
-      if (!receiver) {
-        throw new BadRequestError('Receiver is not provided.', 'RECEIVER_NOT_PROVIDED')
-      }
-      await loginService.verifyWhitelistSig({ chainId, message, receiver, whitelistSig })
-    }
-
-    const whitelistItemDB = await whitelistService.findOne(receiver, dispenser.whitelistType, dispenser._id)
-    if (!whitelistItemDB) {
-      throw new ForbiddenError('Receiver is not whitelisted.', 'RECEIVER_NOT_WHITELISTED')
-    }
-  }
-
-  const encryptedClaimLink = await dispenserService.pop({
-    scanId,
-    receiver,
-    socketId,
-    dispenser
-  })
-
-  res.json({
-    success: true,
-    encrypted_claim_link: encryptedClaimLink
-  })
-}
-
 const getDispenserSettings = async (req, res) => {
   const multiscanQrId = req.params.multiscan_qr_id
   logger.json({ controller: 'dispenser-controller', method: 'getDispenserSettings', multiscan_qr_id: multiscanQrId })
@@ -557,51 +331,16 @@ const getDispenserSettings = async (req, res) => {
   })
 }
 
-const updateReclaimData = async (req, res) => {
-  const userAddress = req.userAddress.toLowerCase()
-  const dispenserId = req.params.dispenser_id
-  const { instagram_follow_id: instagramFollowId } = req.body
-  logger.json({ controller: 'dispenser-controller', method: 'updateReclaimData', dispenser_id: dispenserId })
-
-  const dispenser = await dispenserService.findOneById(dispenserId)
-  if (!dispenser) {
-    throw new NotFoundError('Dispenser not found.', 'DISPENSER_NOT_FOUND')
-  }
-  if (dispenser.creatorAddress.toLowerCase() !== userAddress) {
-    throw new ForbiddenError('User address does not match dispenser creator address.', 'CREATOR_ADDRESS_NOT_VERIFIED')
-  }
-
-  const updatedDispenser = await dispenserService.updateDispenser({
-    dispenserId,
-    instagramFollowId
-  })
-
-  res.json({
-    success: true,
-    dispenser: updatedDispenser
-  })
-}
-
 module.exports = {
-  pop,
   uploadLinks,
   updateLinks,
-  getCampaign,
-  getWhitelist,
-  addWhitelist,
   getDispensers,
   getLinksReport,
   popReclaimLink,
   updateDispenser,
   createDispenser,
   getDispenserById,
-  updateRedirectOn,
-  updateWhitelistOn,
-  updateTimeframeOn,
-  updateRedirectUrl,
-  updateReclaimData,
   getDispenserSettings,
-  updateDispenserStatus,
   receiveReclaimProofs,
   getCampaignDataForClaimer
 }
