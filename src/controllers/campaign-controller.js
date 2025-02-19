@@ -285,11 +285,16 @@ const updateCampaign = async (req, res) => {
 
 const getAllCampaigns = async (req, res) => {
   logger.json({ controller: 'campaign-controller', method: 'getAllCampaigns' })
+  const {
+    limit,
+    offset
+  } = req.query
 
-  const campaigns = await campaignService.getAllCampaigns()
+  const result = await campaignService.getAllCampaigns(offset, limit)
   res.json({
     success: true,
-    campaigns_array: campaigns
+    campaigns_array: result.campaigns,
+    result_set: result.resultSet
   })
 }
 
