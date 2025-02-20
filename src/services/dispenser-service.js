@@ -414,6 +414,8 @@ class DispenserService {
         return context?.extractedParameters?.trusted_username
       case 'x':
         return context?.extractedParameters?.screen_name
+      case 'luma':
+        return context?.extractedParameters?.Name
       default:
         throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
