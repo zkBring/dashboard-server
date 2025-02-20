@@ -13,7 +13,8 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: [
       'instagram',
-      'x'
+      'x',
+      'luma'
     ]
   },
   reclaimSessionId: {
