@@ -10,12 +10,7 @@ const UserSchema = new mongoose.Schema({
     default: false
   },
   reclaimProviderType: {
-    type: String,
-    enum: [
-      'instagram',
-      'x',
-      'luma'
-    ]
+    type: String
   },
   reclaimSessionId: {
     type: String

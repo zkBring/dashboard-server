@@ -5,8 +5,9 @@ const Dispenser = require('../models/dispenser-model')
 const claimApiService = require('./claim-api-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
-const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
 const reclaimVerificationService = require('./reclaim-verification-service')
+const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
+const recalimExtractionKeys = require('../../configs/reclaim-extraction-keys.json')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
 class DispenserService {
@@ -409,16 +410,12 @@ class DispenserService {
 
   getHandleByReclaimProviderType ({ dispenser, reclaimProof }) {
     const context = JSON.parse(reclaimProof.claimData?.context)
-    switch (dispenser.reclaimProviderType) {
-      case 'instagram':
-        return context?.extractedParameters?.trusted_username
-      case 'x':
-        return context?.extractedParameters?.screen_name
-      case 'luma':
-        return context?.extractedParameters?.email
-      default:
-        throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
+    const extractionKey = recalimExtractionKeys[dispenser.reclaimProviderType]
+    if (!extractionKey) {
+      throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
+
+    return context?.extractedParameters?.[extractionKey]
   }
 
   async popReclaimDispenser ({
