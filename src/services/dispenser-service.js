@@ -1,4 +1,4 @@
-const logger = require('../utils/logger')
+fconst logger = require('../utils/logger')
 const userService = require('./user-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
@@ -415,7 +415,7 @@ class DispenserService {
       case 'x':
         return context?.extractedParameters?.screen_name
       case 'luma':
-        return context?.extractedParameters?.Name
+        return context?.extractedParameters?.email
       default:
         throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
