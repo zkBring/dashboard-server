@@ -1,4 +1,4 @@
-fconst logger = require('../utils/logger')
+const logger = require('../utils/logger')
 const userService = require('./user-service')
 const stageConfig = require('../../stage-config')
 const Dispenser = require('../models/dispenser-model')
