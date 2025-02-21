@@ -13,18 +13,11 @@ const createDispenser = async (req, res) => {
   const creatorAddress = req.userAddress.toLowerCase()
   const {
     title,
-    dynamic,
-    reclaim,
-    app_title: appTitle,
     claim_start: claimStart,
     redirect_on: redirectOn,
-    app_title_on: appTitleOn,
     claim_finish: claimFinish,
-    redirect_url: redirectUrl,
     timeframe_on: timeframeOn,
-    claim_duration: claimDuration,
     multiscan_qr_id: multiscanQrId,
-    instagram_follow_id: instagramFollowId,
     encrypted_multiscan_qr_secret: encryptedMultiscanQrSecret,
     encrypted_multiscan_qr_enc_code: encryptedMultiscanQrEncCode
   } = req.body
@@ -36,19 +29,13 @@ const createDispenser = async (req, res) => {
 
   let dispenserDB = await dispenserService.create({
     title,
-    dynamic,
-    reclaim,
-    appTitle,
     claimStart,
-    appTitleOn,
     claimFinish,
     redirectOn,
     timeframeOn,
     redirectUrl,
-    claimDuration,
     multiscanQrId,
     creatorAddress,
-    instagramFollowId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   })
