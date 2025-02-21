@@ -7,7 +7,7 @@ const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
 const reclaimVerificationService = require('./reclaim-verification-service')
 const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
-const recalimExtractionKeys = require('../../configs/reclaim-extraction-keys.json')
+const zktlsServices = require('../../configs/zktls-services.json')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
 class DispenserService {
@@ -410,7 +410,7 @@ class DispenserService {
 
   getHandleByReclaimProviderType ({ dispenser, reclaimProof }) {
     const context = JSON.parse(reclaimProof.claimData?.context)
-    const extractionKey = recalimExtractionKeys[dispenser.reclaimProviderType]
+    const extractionKey = zktlsServices[dispenser.reclaimProviderType]
     if (!extractionKey) {
       throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
