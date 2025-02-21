@@ -39,92 +39,68 @@ class DispenserService {
 
   async create ({
     title,
-    dynamic,
-    reclaim,
-    appTitle,
-    appTitleOn,
     claimStart,
     claimFinish,
-    redirectOn,
     timeframeOn,
-    redirectUrl,
-    claimDuration,
+    reclaimAppId,
+    zktlsService,
     multiscanQrId,
+    proofProvider,
     creatorAddress,
-    instagramFollowId,
+    reclaimAppSecret,
+    reclaimProviderId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
     const params = {
       title,
-      dynamic,
-      reclaim,
-      appTitle,
-      appTitleOn,
       claimStart,
       claimFinish,
-      redirectOn,
       timeframeOn,
-      redirectUrl,
-      claimDuration,
+      zktlsService,
+      proofProvider,
       encryptedMultiscanQrSecret,
       encryptedMultiscanQrEncCode,
       multiscanQrId: multiscanQrId.toLowerCase(),
       creatorAddress: creatorAddress.toLowerCase()
     }
 
-    if (reclaim === true) {
-      params.reclaimAppId = stageConfig.RECLAIM_APP_ID
-      params.reclaimAppSecret = stageConfig.RECLAIM_APP_SECRET
-      params.reclaimProviderId = stageConfig.RECLAIM_PROVIDER_ID
-      params.reclaimProviderType = stageConfig.RECLAIM_PROVIDER_TYPE
-      params.instagramFollowId = instagramFollowId
-    }
+    if (zktlsService === 'reclaim' && proofProvider === 'custom') {
+          params.reclaimAppId = reclaimAppId
+          params.reclaimAppSecret = reclaimAppSecret
+          params.reclaimProviderId = reclaimProviderId
+    } else if (zktlsService === 'reclaim') {}
 
     return await this._create(params)
   }
 
   async _create ({
     title,
-    dynamic,
-    reclaim,
-    appTitle,
-    appTitleOn,
     claimStart,
     claimFinish,
-    redirectOn,
     timeframeOn,
-    redirectUrl,
     reclaimAppId,
-    claimDuration,
+    zktlsService,
     multiscanQrId,
+    proofProvider,
     creatorAddress,
     reclaimAppSecret,
-    instagramFollowId,
     reclaimProviderId,
-    reclaimProviderType,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
     const dispenserDB = new Dispenser({
       title,
-      dynamic,
-      reclaim,
-      appTitle,
-      appTitleOn,
       claimStart,
       claimFinish,
-      redirectOn,
       timeframeOn,
-      redirectUrl,
       reclaimAppId,
-      claimDuration,
+      zktlsService,
       multiscanQrId,
+      proofProvider,
       creatorAddress,
       reclaimAppSecret,
-      instagramFollowId,
       reclaimProviderId,
-      reclaimProviderType,
       encryptedMultiscanQrSecret,
       encryptedMultiscanQrEncCode
     })

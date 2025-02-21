@@ -17,7 +17,12 @@ const createDispenser = async (req, res) => {
     redirect_on: redirectOn,
     claim_finish: claimFinish,
     timeframe_on: timeframeOn,
+    zktls_service: zktlsService,
+    reclaim_app_id: reclaimAppId,
+    proof_provider: proofProvider,
     multiscan_qr_id: multiscanQrId,
+    reclaim_app_secret: reclaimAppSecret,
+    reclaim_provider_id: reclaimProviderId,
     encrypted_multiscan_qr_secret: encryptedMultiscanQrSecret,
     encrypted_multiscan_qr_enc_code: encryptedMultiscanQrEncCode
   } = req.body
@@ -34,8 +39,13 @@ const createDispenser = async (req, res) => {
     redirectOn,
     timeframeOn,
     redirectUrl,
+    reclaimAppId,
+    zktlsService,
     multiscanQrId,
+    proofProvider,
     creatorAddress,
+    reclaimAppSecret,
+    reclaimProviderId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   })
