@@ -150,6 +150,26 @@ class CampaignService {
     return await Campaign.findOne({ _id: campaignId })
   }
 
+  async getAllCampaigns(offset, limit) {
+    offset = Number(offset) || 0
+    limit = Number(limit) || 10
+
+    const campaigns = await Campaign.find({})
+      .sort({ _id: -1 })
+      .skip(offset)
+      .limit(limit)
+
+    const total = await Campaign.countDocuments()
+    return {
+      campaigns,
+      resultSet: {
+        offset,
+        total,
+        count: campaigns.length
+      }
+    }
+  }
+
   async findCampaignsAndCountLinks (creatorAddress, chainId) {
     const campaigns = await this.findByCreatorAddressAndChainId(creatorAddress, chainId)
     if (!campaigns.length) return campaigns

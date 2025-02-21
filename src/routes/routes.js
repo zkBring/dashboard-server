@@ -47,9 +47,15 @@ const routes = {
     },
     get: {
       controller: 'campaign-controller',
-      method: 'getCampaigns',
+      method: 'getUserCampaigns',
       authType: ['JWT'],
-      celebrateSchema: 'getCampaigns'
+      celebrateSchema: 'getUserCampaigns'
+    }
+  },
+  '/dashboard/all-campaigns': {
+    get: {
+      controller: 'campaign-controller',
+      method: 'getAllCampaigns'
     }
   },
   '/dashboard/dispensers': {

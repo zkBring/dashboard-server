@@ -110,7 +110,7 @@ const createCampaign = async (req, res) => {
   })
 }
 
-const getCampaigns = async (req, res) => {
+const getUserCampaigns = async (req, res) => {
   logger.json({ controller: 'campaign-controller', method: 'getCampaigns', user_address: req.userAddress })
   const creatorAddress = req.userAddress
   const chainId = req.query.chain_id
@@ -283,12 +283,28 @@ const updateCampaign = async (req, res) => {
   })
 }
 
+const getAllCampaigns = async (req, res) => {
+  logger.json({ controller: 'campaign-controller', method: 'getAllCampaigns' })
+  const {
+    limit,
+    offset
+  } = req.query
+
+  const result = await campaignService.getAllCampaigns(offset, limit)
+  res.json({
+    success: true,
+    campaigns_array: result.campaigns,
+    result_set: result.resultSet
+  })
+}
+
 module.exports = {
-  getCampaigns,
   createCampaign,
   updateCampaign,
   getLinksReport,
   getCampaignById,
   getLinksBatches,
+  getAllCampaigns,
+  getUserCampaigns,
   getLinksBatchById
 }
