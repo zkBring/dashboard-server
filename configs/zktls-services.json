@@ -1,8 +1,11 @@
 {
   "reclaim": {
-    "instagram": "trusted_username",
-    "x": "screen_name",
-    "luma": "email"
+    
+    "handleKeys":{
+      "instagram": "trusted_username",
+      "x": "screen_name",
+      "luma": "email"
+    }
   },
   "pluto": {}
 }
