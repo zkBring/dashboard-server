@@ -127,7 +127,7 @@ const getUserCampaigns = async (req, res) => {
 }
 
 const getCampaignById = async (req, res) => {
-  logger.json({ controller: 'campaign-controller', method: 'getCampaignById', user_address: req.userAddress })
+  logger.json({ controller: 'campaign-controller', method: 'getCampaignById' })
   const campaignId = req.params.campaign_id
 
   if (!ObjectId.isValid(campaignId)) {
@@ -135,9 +135,6 @@ const getCampaignById = async (req, res) => {
   }
 
   const campaign = await campaignService.getCampaignData(campaignId)
-  if (campaign.creator_address.toLowerCase() !== req.userAddress) {
-    throw new ForbiddenError('User address doesn’t match campaign creator address', 'CREATOR_ADDRESS_NOT_VALID')
-  }
 
   res.json({
     success: true,

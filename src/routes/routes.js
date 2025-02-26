@@ -3,7 +3,6 @@ const routes = {
     get: {
       controller: 'campaign-controller',
       method: 'getCampaignById',
-      authType: ['JWT'],
       celebrateSchema: 'checkCampaignId'
     },
     patch: {
