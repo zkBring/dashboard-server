@@ -5,8 +5,9 @@ const Dispenser = require('../models/dispenser-model')
 const claimApiService = require('./claim-api-service')
 const claimLinkService = require('./claim-link-service')
 const dispenserLinkService = require('./dispenser-link-service')
-const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
 const reclaimVerificationService = require('./reclaim-verification-service')
+const { ReclaimProofRequest, verifyProof } = require('@reclaimprotocol/js-sdk')
+const zktlsServices = require('../../configs/zktls-services.json')
 const { ForbiddenError, NotFoundError, BadRequestError } = require('../utils/errors')
 
 class DispenserService {
@@ -38,92 +39,68 @@ class DispenserService {
 
   async create ({
     title,
-    dynamic,
-    reclaim,
-    appTitle,
-    appTitleOn,
     claimStart,
     claimFinish,
-    redirectOn,
     timeframeOn,
-    redirectUrl,
-    claimDuration,
+    reclaimAppId,
+    zktlsService,
     multiscanQrId,
+    proofProvider,
     creatorAddress,
-    instagramFollowId,
+    reclaimAppSecret,
+    reclaimProviderId,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
     const params = {
       title,
-      dynamic,
-      reclaim,
-      appTitle,
-      appTitleOn,
       claimStart,
       claimFinish,
-      redirectOn,
       timeframeOn,
-      redirectUrl,
-      claimDuration,
+      zktlsService,
+      proofProvider,
       encryptedMultiscanQrSecret,
       encryptedMultiscanQrEncCode,
       multiscanQrId: multiscanQrId.toLowerCase(),
       creatorAddress: creatorAddress.toLowerCase()
     }
 
-    if (reclaim === true) {
-      params.reclaimAppId = stageConfig.RECLAIM_APP_ID
-      params.reclaimAppSecret = stageConfig.RECLAIM_APP_SECRET
-      params.reclaimProviderId = stageConfig.RECLAIM_PROVIDER_ID
-      params.reclaimProviderType = stageConfig.RECLAIM_PROVIDER_TYPE
-      params.instagramFollowId = instagramFollowId
-    }
+    if (zktlsService === 'reclaim' && proofProvider === 'custom') {
+          params.reclaimAppId = reclaimAppId
+          params.reclaimAppSecret = reclaimAppSecret
+          params.reclaimProviderId = reclaimProviderId
+    } else if (zktlsService === 'reclaim') {}
 
     return await this._create(params)
   }
 
   async _create ({
     title,
-    dynamic,
-    reclaim,
-    appTitle,
-    appTitleOn,
     claimStart,
     claimFinish,
-    redirectOn,
     timeframeOn,
-    redirectUrl,
     reclaimAppId,
-    claimDuration,
+    zktlsService,
     multiscanQrId,
+    proofProvider,
     creatorAddress,
     reclaimAppSecret,
-    instagramFollowId,
     reclaimProviderId,
-    reclaimProviderType,
     encryptedMultiscanQrSecret,
     encryptedMultiscanQrEncCode
   }) {
     const dispenserDB = new Dispenser({
       title,
-      dynamic,
-      reclaim,
-      appTitle,
-      appTitleOn,
       claimStart,
       claimFinish,
-      redirectOn,
       timeframeOn,
-      redirectUrl,
       reclaimAppId,
-      claimDuration,
+      zktlsService,
       multiscanQrId,
+      proofProvider,
       creatorAddress,
       reclaimAppSecret,
-      instagramFollowId,
       reclaimProviderId,
-      reclaimProviderType,
       encryptedMultiscanQrSecret,
       encryptedMultiscanQrEncCode
     })
@@ -409,16 +386,12 @@ class DispenserService {
 
   getHandleByReclaimProviderType ({ dispenser, reclaimProof }) {
     const context = JSON.parse(reclaimProof.claimData?.context)
-    switch (dispenser.reclaimProviderType) {
-      case 'instagram':
-        return context?.extractedParameters?.trusted_username
-      case 'x':
-        return context?.extractedParameters?.screen_name
-      case 'luma':
-        return context?.extractedParameters?.email
-      default:
-        throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
+    const extractionKey = zktlsServices[dispenser.reclaimProviderType]
+    if (!extractionKey) {
+      throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
     }
+
+    return context?.extractedParameters?.[extractionKey]
   }
 
   async popReclaimDispenser ({

@@ -43,5 +43,5 @@
   "CLAIM_LINK_NOT_AVAILABLE_IN_REGION": { "warn": true },
   "USER_SHOULD_FOLLOW_CORRECT_ACCOUNT": { "warn": true },
   "UPLOADING_DUPLICATE_LINKS_IS_FORBIDDEN": { "warn": true },
-  "TOKEN_OR_X_CAMPAIGN_KEY_OR_CUSTOMER_NOT_PROVIDED": { "warn": true }
+  "TOKEN_NOT_PROVIDED": { "warn": true }
 }
