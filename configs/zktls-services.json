@@ -1,11 +1,30 @@
 {
   "reclaim": {
-    
-    "handleKeys":{
-      "instagram": "trusted_username",
-      "x": "screen_name",
-      "luma": "email"
-    }
+      "0x6e9Ba629a13E0a599150b949abafa149159253a8": {
+        "reclaimProviderId": "8e5e493e-17da-4a6d-9ea9-ab728156a3f4",
+        "reclaimProviderType": "instagram",
+        "handleKey": "trusted_username"
+      },
+      "0x554bF6F64CAb1d4d6A3283b79aB5a43C810459E1": {
+        "reclaimProviderId": "90924319-31ed-4d8d-a3cc-bd3e67a0d5cf",
+        "reclaimProviderType": "instagram",
+        "handleKey": "trusted_username"
+      },
+      "0xA75B126444BBC9Ee9Cf26CBD51F41E34c781384f": {
+        "reclaimProviderId": "ea65ec88-46c2-494d-9619-f9411db508ec",
+        "reclaimProviderType": "instagram",
+        "handleKey": "trusted_username"
+      },
+      "0x4203699ae2549c544B1f91e748e66AA61D9aF182": {
+        "reclaimProviderId": "e6fe962d-8b4e-4ce5-abcc-3d21c88bd64a",
+        "reclaimProviderType": "x",
+        "handleKey": "screen_name"
+      },
+      "0x0f802E6240aE71877c90b1f4E4c9CCDda5816731": {
+        "reclaimProviderId": "c9c6b85b-2e15-4be9-bf5d-0ffda17e71f3",
+        "reclaimProviderType": "luma",
+        "handleKey": "email"
+      }
   },
   "pluto": {}
 }

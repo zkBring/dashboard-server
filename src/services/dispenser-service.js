@@ -386,12 +386,12 @@ class DispenserService {
 
   getHandleByReclaimProviderType ({ dispenser, reclaimProof }) {
     const context = JSON.parse(reclaimProof.claimData?.context)
-    const extractionKey = zktlsServices[dispenser.reclaimProviderType]
-    if (!extractionKey) {
-      throw new BadRequestError('Dispenser reclaim provider type is incorrect.', 'PROIDER_TYPE_IS_INCORRECT')
+    const handleKey = zktlsServices.reclaim?.[dispenser.reclaimAppId]?.handleKey
+    if (!handleKey) {
+      throw new BadRequestError('Handle key is not defined for this provider.', 'HANDLE_KEY_NOT_DEFINED_FOR_THIS_PROVIDER')
     }
 
-    return context?.extractedParameters?.[extractionKey]
+    return context?.extractedParameters?.[handleKey]
   }
 
   async popReclaimDispenser ({
